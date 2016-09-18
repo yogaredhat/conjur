@@ -19,5 +19,4 @@ RUN apt-get update && \
 CMD /opt/possum/create.sh
 
 ADD createcluster.conf /etc/postgresql-common/createcluster.conf
-ADD extension/* /usr/share/postgresql/9.4/extension/
 ADD create.sh /opt/possum/

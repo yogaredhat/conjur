@@ -15,7 +15,6 @@ su postgres -c "createdb possum"
 su postgres -c "psql possum" << EOF
   CREATE EXTENSION btree_gist;
   CREATE EXTENSION bdr;
-  CREATE EXTENSION possum_mm;
 EOF
 
 # stop to exec

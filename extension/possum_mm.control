@@ -1,5 +1,0 @@
-default_version = '0.1'
-comment = 'Utilities for setting up Possum multi-master database'
-requires = 'bdr'
-superuser = true
-schema = 'possum_mm'
