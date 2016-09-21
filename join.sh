@@ -34,6 +34,7 @@ su postgres -c "psql possum" << EOF
   SELECT bdr.bdr_group_join(
     local_node_name := '$HOST',
     node_external_dsn := 'host=$HOST',
+    node_local_dsn := 'dbname=possum', -- this is only used for initialization
     join_using_dsn := 'host=$UPSTREAM'
   )
 EOF
