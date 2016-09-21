@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+  sol:
+    build: .
+
+  sirius:
+    build: .
+
+  centauri:
+    build: .
+
+  possum:
+    image: conjurinc/possum
+    command: server -p 80
+    environment:
+      POSSUM_DATA_KEY: cYnWFEGVxiPzVB7tRX1VfVXrar1to0UhvPY9XrNM0P4=
+      POSSUM_ADMIN_PASSWORD: secret
+
+  possum-sol:
+    extends:
+      service: possum
+    depends_on: [sol]
+    environment:
+      DATABASE_URL: postgres://postgres@sol/possum
+    volumes:
+      - ./policy:/policy
+
+  possum-sirius:
+    extends:
+      service: possum
+    depends_on: [sirius]
+    environment:
+      DATABASE_URL: postgres://postgres@sirius/possum
+
+  possum-centauri:
+    extends:
+      service: possum
+    depends_on: [centauri]
+    environment:
+      DATABASE_URL: postgres://postgres@centauri/possum
+
+  #python-api:
+    #build: ../api-python
+    #volumes:
+      #- ../api-python:/app:ro
