@@ -1,9 +1,6 @@
 #!/bin/sh -ex
 
 if ! (pg_lsclusters | grep possum); then
-  [ -z "$EXTERNAL_HOST_NAME" ] && exit 1
-  [ -z "$THIS_NODE_NAME" ] && THIS_NODE_NAME="$EXTERNAL_HOST_NAME"
-
   # NOTE: cluster cannot be precreated in Dockerfile, because
   # BDR uses unique cluster ID to identify nodes in replication
   pg_createcluster 9.4 possum --start
