@@ -23,3 +23,8 @@ run/finished
 coverage
 .DS_Store
 demo/run/*.yml
+
+# Puppet hackathon
+dev/manifest.pp
+dev/manifest.ppe
+

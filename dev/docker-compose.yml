@@ -1,6 +1,6 @@
 pg:
-  image: postgres:9.3
-  
+  image: postgres:9.3  
+
 possum:
   image: possum-dev
   environment:
@@ -8,6 +8,8 @@ possum:
     DATABASE_URL: postgres://postgres@pg/postgres
     POSSUM_ADMIN_PASSWORD: admin
     CONJUR_PASSWORD_ALICE: secret
+    # Activate v4 compatibility
+    CONJUR_ACCOUNT: cucumber
     POSSUM_DATA_KEY:
     RAILS_ENV:
   volumes:
@@ -15,6 +17,18 @@ possum:
   - ../../conjur-policy-parser:/src/conjur-policy-parser
   links:
   - pg:pg
+
+node:
+  dockerfile: Dockerfile.node
+  build: .
+  environment:
+    CONJUR_APPLIANCE_URL: http://possum
+    CONJUR_ACCOUNT: cucumber
+  command: sleep infinity
+  links:
+  - possum:possum
+  volumes:
+  - ..:/src/possum
 
 cucumber:
   image: possum-dev

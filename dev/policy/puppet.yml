@@ -1,0 +1,34 @@
+- !policy
+  id: inventory-db
+  annotations:
+    description: Governs access to the inventory database.
+  body:
+    - !variable &password
+      id: password
+      annotations:
+        description: Database password for inventory.
+        
+    - !group secrets-users
+
+    - !permit
+      role: !group secrets-users
+      resource: *password
+      privilege: [ read, execute ]
+
+- !policy
+  id: inventory
+  annotations:
+    description: Governs access to the inventory service.
+  body:
+    - !layer
+      annotations:
+        description: Layer for inventory hosts.
+
+    - !host-factory
+      annotations:
+        description: Host Factory for inventory layer.
+      layers: [ !layer ]
+
+- !grant
+  role: !group inventory-db/secrets-users
+  member: !layer inventory

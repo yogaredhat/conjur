@@ -1,0 +1,11 @@
+FROM ubuntu:14.04
+
+ENV PUPPET_VERSION puppetlabs-release-pc1-trusty.deb
+
+RUN apt-get update && apt-get install -y wget curl jq
+RUN wget https://apt.puppetlabs.com/$PUPPET_VERSION && dpkg -i $PUPPET_VERSION && rm $PUPPET_VERSION
+RUN apt-get update && apt-get install -y puppet-agent
+RUN update-alternatives --install /usr/bin/puppet puppet-agent /opt/puppetlabs/bin/puppet 100
+RUN puppet module install conjur-conjur
+
+WORKDIR /src/possum/dev
