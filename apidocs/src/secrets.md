@@ -45,7 +45,7 @@ Fetch the value of a secret in the specified variable. The latest version will b
 
 ### Batch Secret Retrieval [GET]
 
-Fetch the values of a list of variables. This operation is more efficient than
+Fetch the most recently created secret values of a list of variables. This operation is more efficient than
 fetching the values one by one.
 
 **Response**
