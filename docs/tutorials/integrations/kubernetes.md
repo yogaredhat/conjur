@@ -284,7 +284,7 @@ Create the policy "root.yml":
 And load it:
 
 {% highlight shell %}
-$ conjur policy load root conjur.yml
+$ conjur policy load root root.yml
 Loaded policy 'root'
 {
   "created_roles": {

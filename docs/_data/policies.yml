@@ -290,3 +290,7 @@ kubernetes-database: |
     privileges: [ read, execute ]
     resources: *variables
 
+  - !grant
+    role: !group secrets-users
+    member: !layer /prod/myapp
+
