@@ -12,23 +12,12 @@ pipeline {
   stages {
     stage('Checkout SCM') {
       steps {
-        sh 'sudo chown -R jenkins:jenkins .'  // bad docker mount creates unreadable files TODO fix this
-        deleteDir()  // delete current workspace, for a clean build
-
         checkout scm
       }
     }
     stage('Build Image') {
       steps {
-        sh './build.sh'
-      }
-    }
-
-    stage('Build deb') {
-      steps {
-        sh './package.sh'
-
-        archiveArtifacts artifacts: '*.deb', fingerprint: true
+        sh './build.sh -j'
       }
     }
 
@@ -37,6 +26,14 @@ pipeline {
         sh './test.sh'
 
         junit 'spec/reports/*.xml,cucumber/api/features/reports/**/*.xml,cucumber/policy/features/reports/**/*.xml,scaling_features/reports/**/*.xml,reports/*.xml'
+      }
+    }
+
+    stage('Build deb') {
+      steps {
+        sh './package.sh'
+
+        archiveArtifacts artifacts: '*.deb', fingerprint: true
       }
     }
 
@@ -49,6 +46,12 @@ pipeline {
     stage('Push image') {
       steps {
         sh './push-image.sh'
+      }
+    }
+
+    stage('Check website for broken links') {
+      steps {
+        sh './checklinks.sh'
       }
     }
 
@@ -72,6 +75,10 @@ pipeline {
   }
 
   post {
+    always {
+      sh 'sudo chown -R jenkins:jenkins .'  // bad docker mount creates unreadable files TODO fix this
+      deleteDir()  // delete current workspace, for a clean build
+    }
     failure {
       slackSend(color: 'danger', message: "${env.JOB_NAME} #${env.BUILD_NUMBER} FAILURE (<${env.BUILD_URL}|Open>)")
     }

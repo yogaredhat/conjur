@@ -19,9 +19,9 @@ RUN apt-get install -y \
 
 RUN gem install -N -v 1.11.2 bundler
 
-RUN mkdir -p /opt/possum
+RUN mkdir -p /opt/conjur-server
 
-WORKDIR /opt/possum
+WORKDIR /opt/conjur-server
 
 ADD Gemfile      .
 ADD Gemfile.lock .
@@ -33,7 +33,7 @@ ADD . .
 RUN mkdir -p .bundle
 RUN echo "BUNDLE_WITHOUT: test:development:website" > .bundle/config
 
-RUN ln -sf /opt/possum/bin/possum /usr/local/bin/
+RUN ln -sf /opt/conjur-server/bin/conjurctl /usr/local/bin/
 
 ENV PORT 80
 
@@ -41,4 +41,4 @@ EXPOSE 80
 
 ENV RAILS_ENV production
 
-ENTRYPOINT [ "possum" ]
+ENTRYPOINT [ "conjurctl" ]

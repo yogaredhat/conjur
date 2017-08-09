@@ -68,7 +68,9 @@ main:
             title: Custom Authentication
             path: /tutorials/integrations/authenticators.html
 
-
+  apidocs:
+    title: API Documentation
+    path: /apidocs.html
   reference:
     title: Reference
     path: /reference/
