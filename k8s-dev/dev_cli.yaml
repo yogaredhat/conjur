@@ -1,23 +1,17 @@
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: cli5
+  name: client
 spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: cli5
-    spec:
-      containers:
-      - image: conjurinc/cli5
-        name: cli5
-        imagePullPolicy: IfNotPresent
-        command: [ sleep ]
-        args: [ infinity ]
-        env:
-        - name: CONJUR_APPLIANCE_URL
-          value: http://conjur
-        - name: CONJUR_ACCOUNT
-          value: mycorp
+  containers:
+  - image: conjurinc/cli5
+    name: cli5
+    imagePullPolicy: IfNotPresent
+    command: [ sleep ]
+    args: [ infinity ]
+    env:
+    - name: CONJUR_APPLIANCE_URL
+      value: http://conjur
+    - name: CONJUR_ACCOUNT
+      value: mycorp

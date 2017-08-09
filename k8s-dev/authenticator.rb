@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'conjur-api'
+require 'conjur-cli'
 require 'restclient'
 
 Conjur.configuration.apply_cert_config!
