@@ -5,7 +5,30 @@ describe AuthenticateController, :type => :controller do
   let(:login) { "u-#{random_hex}" }
   let(:account) { "rspec" }
 
-  describe "#authenticate" do
+  def self.it_succeeds
+    it "succeeds" do
+      invoke
+      expect(response).to have_valid_token_for(login)
+    end
+  end
+  
+  def self.it_fails
+    it "fails" do
+      invoke
+      expect(response).to_not be_ok
+      expect{ JSON.parse response.body }.to raise_error
+    end
+  end
+  
+  def self.it_fails_with status_code
+    it "fails with #{status_code}" do
+      invoke
+      expect(response).not_to be_ok
+      expect(response.code).to eq(status_code.to_s)
+    end
+  end
+
+  describe "#authenticate_basic" do
     include_context "create user"
     
     RSpec::Matchers.define :have_valid_token_for do |login|
@@ -19,32 +42,9 @@ describe AuthenticateController, :type => :controller do
     end
     
     def invoke
-      post :authenticate, { account: account, id: login }
+      post :authenticate_basic, { account: account, id: login }
     end
-    
-    def self.it_succeeds
-      it "succeeds" do
-        invoke
-        expect(response).to have_valid_token_for(login)
-      end
-    end
-    
-    def self.it_fails
-      it "fails" do
-        invoke
-        expect(response).to_not be_ok
-        expect{ JSON.parse response.body }.to raise_error
-      end
-    end
-    
-    def self.it_fails_with status_code
-      it "fails with #{status_code}" do
-        invoke
-        expect(response).not_to be_ok
-        expect(response.code).to eq(status_code.to_s)
-      end
-    end
-    
+        
     context "with password" do
       before { request.env['RAW_POST_DATA'] = password }
       it_fails_with 401
@@ -61,7 +61,7 @@ describe AuthenticateController, :type => :controller do
 
     context "with non-existent user" do
       def invoke
-        post :authenticate, account: account, id: 'santa-claus'
+        post :authenticate_basic, account: account, id: 'santa-claus'
       end
 
       it_fails_with 401

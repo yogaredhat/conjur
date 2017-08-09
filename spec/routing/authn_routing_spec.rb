@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe "routing for authentication", :type => :routing do
-  it "routes POST /authn/the-account/kevin.gilpin@inscitiv.com/authenticate to authenticate#authenticate" do
+  it "routes POST /authn/the-account/kevin.gilpin@inscitiv.com/authenticate to authenticate#authenticate_basic" do
     expect(post: '/authn/the-account/kevin.gilpin@inscitiv.com/authenticate').to route_to(
       controller: 'authenticate',
-      action: 'authenticate',
+      action: 'authenticate_basic',
       account: 'the-account',
       id: 'kevin.gilpin@inscitiv.com'
     )

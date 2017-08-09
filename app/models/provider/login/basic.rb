@@ -1,5 +1,5 @@
-module Login
-  module Provider
+module Provider
+  module Login
     Basic = Struct.new(:account, :authentication, :request) do
 
       require 'action_controller/metal/http_authentication'
@@ -12,7 +12,9 @@ module Login
             authentication.basic_user = true
           end
         end
-        raise Exceptions::Unauthorized, "Client not authenticated" unless authentication.authenticated?
+        Rails.logger.debug "Client not authenticated"
+        raise Exceptions::Unauthorized unless authentication.authenticated?
+        true
       end
     end
   end

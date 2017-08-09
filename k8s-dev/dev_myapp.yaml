@@ -10,24 +10,6 @@ spec:
       labels:
         app: myapp
     spec:
-      initContainers:
-      - image: authenticator
-        imagePullPolicy: IfNotPresent
-        name: authenticator-init
-        command: [ authenticate-once ]
-        env:
-        - name: CONJUR_APPLIANCE_URL
-          value: http://conjur
-        - name: CONJUR_ACCOUNT
-          value: mycorp
-        - name: K8S_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        volumeMounts:
-        - mountPath: /run/conjur
-          name: conjur-access-token
-
       containers:
       - image: authenticator
         imagePullPolicy: IfNotPresent
@@ -35,6 +17,8 @@ spec:
         env:
         - name: CONJUR_APPLIANCE_URL
           value: http://conjur
+        - name: CONJUR_AUTHN_URL
+          value: http://conjur/authn-kubernetes
         - name: CONJUR_ACCOUNT
           value: mycorp
         - name: K8S_NAMESPACE

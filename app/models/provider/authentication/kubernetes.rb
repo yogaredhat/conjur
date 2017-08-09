@@ -1,18 +1,21 @@
-module Login
-  module Provider
-    Kubernetes = Struct.new(:account, :authentication, :request) do
+module Provider
+  module Authentication
+    Kubernetes = Struct.new(:role, :request) do
 
-      def perform_login
+      def perform_authentication
         role_ids = collect_role_ids
-        role_id = role_ids.find do |id|
-          Role[id]
+        unless role_ids.member?(role.role_id)
+          Rails.logger.debug "Role #{role.role_id.inspect} not found in Kubernetes object list #{role_ids.inspect}"
+          raise Exceptions::Unauthorized
         end
-        raise Exceptions::Unauthorized, "Role not found" unless role_id
-        role = Role[role_id]
-        authentication.authenticated_role = role
+        true
       end
 
       protected
+
+      def account
+        role.account
+      end
 
       def rack_request
         @rack_request ||= Rack::Request.new(request.env)
@@ -108,21 +111,8 @@ module Login
         build_kubectl_client api: 'apis/apps', version: 'v1beta1'
       end
 
-      KUBERNETES_SERVICEACCOUNT_DIR = '/var/run/secrets/kubernetes.io/serviceaccount'
-
       def build_kubectl_client api: "api", version: "v1"
-        raise "Kubernetes serviceaccount dir #{KUBERNETES_SERVICEACCOUNT_DIR} does not exist" unless File.exists?(KUBERNETES_SERVICEACCOUNT_DIR)
-        %w(KUBERNETES_SERVICE_HOST KUBERNETES_SERVICE_PORT).each do |var|
-          raise "Expected environment variable #{var} is not set" unless ENV[var]
-        end
-
-        token_args = {
-            auth_options: {
-              bearer_token_file: File.join(KUBERNETES_SERVICEACCOUNT_DIR, 'token')
-            }
-          }
-
-        Kubeclient::Client.new [ "http://localhost:8080", api ].join('/'), version, token_args
+        Kubeclient::Client.new [ "http://localhost:8080", api ].join('/'), version
       end
     end
   end

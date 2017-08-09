@@ -2,7 +2,14 @@
 
 require 'conjur-api'
 
-api = Conjur::API.new_from_token_file "/run/conjur/access-token"
+token_filename = "/run/conjur/access-token"
+while !File.exists?(token_filename)
+  $stderr.puts "Waiting for #{token_filename} to exist"
+  sleep 2
+end
+
+
+api = Conjur::API.new_from_token_file token_filename
 variable_id = "#{Conjur.configuration.account}:variable:prod/mydb/password"
 
 while true

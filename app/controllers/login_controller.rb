@@ -1,5 +1,6 @@
 class LoginController < ApplicationController
   include BasicAuthenticator
+  include HasProviders
 
   # Perform the login strategy.
   before_filter :perform_login
@@ -14,10 +15,6 @@ class LoginController < ApplicationController
     render_api_key
   end
 
-  def login_kubernetes
-    render_api_key
-  end
-  
   protected
 
   def render_api_key
@@ -25,8 +22,7 @@ class LoginController < ApplicationController
   end
 
   def provider
-    _, provider_name = action_name.split('_', 2)
-    Login::Provider.const_get(provider_name.underscore.camelize).new account, authentication, request
+    lookup_provider(Provider::Login).new account, authentication, request
   end
   
   def perform_login

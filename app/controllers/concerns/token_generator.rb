@@ -8,5 +8,4 @@ module TokenGenerator
   def sign_token role
     signing_key.signed_token Role.username_from_roleid(role.id)
   end
-
 end
