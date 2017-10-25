@@ -1,0 +1,6 @@
+- !layer
+
+
+- !grant
+  role: !layer
+  member: !host /conjur/authn-kubernetes/dev/workloads/myapp

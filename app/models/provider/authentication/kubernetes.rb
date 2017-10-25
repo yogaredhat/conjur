@@ -1,21 +1,117 @@
+require 'kubeclient'
+
 module Provider
   module Authentication
+    # Determines whether a Pod is contained within various Kubernetes workload types.
+    # For example, given a Pod, determine whether it's part of a ReplicaSet, Deployment, or StatefulSet.
+    module KubernetesWorkloadMatcher
+      Pod = Struct.new(:name) do
+        def include? pod
+          pod.metadata.name == self.name
+        end
+      end
+
+      Replicaset = Struct.new(:name) do
+        def include? pod
+          return false unless pod.metadata.ownerReferences
+          pod.metadata.ownerReferences.select{|ref| ref.kind == "ReplicaSet"}.find{|ref| ref.name == self.name}
+        end
+      end
+
+      Deployment = Struct.new(:name) do
+        def include? pod
+          return false unless pod.metadata.labels && 
+              pod.metadata.labels['pod-template-hash'] &&
+              pod.metadata.ownerReferences
+
+          template_hash = pod.metadata.labels['pod-template-hash']
+          pod.metadata.ownerReferences.select{|ref| ref.kind == "ReplicaSet"}.find{|ref| ref.name == "#{self.name}-#{template_hash}"}
+        end
+      end
+
+      Statefulset = Struct.new(:name) do
+        def include? pod
+          return false unless pod.metadata.annotations &&
+            pod.metadata.annotations['kubernetes.io/created-by']
+          annotations = JSON.parse(pod.metadata.annotations['kubernetes.io/created-by'])
+          annotations['reference'] &&
+            annotations['reference']['kind'] &&
+            annotations['reference']['kind'] == 'StatefulSet' &&
+            annotations['reference']['name'] == self.name
+        end
+      end
+
+      class << self
+        def matcher type, name
+          const_get(type.classify).new(name)
+        end
+      end
+    end
+
     Kubernetes = Struct.new(:role, :request) do
 
+      KUBERNETES_SERVICEACCOUNT_DIR = '/var/run/secrets/kubernetes.io/serviceaccount'
+
+      class << self
+        # Builds a Kubeclient::Client for an API path and version.
+        def kube_client api: "api", version: "v1"
+          raise "Kubernetes serviceaccount dir #{KUBERNETES_SERVICEACCOUNT_DIR} does not exist" unless File.exists?(KUBERNETES_SERVICEACCOUNT_DIR)
+          %w(KUBERNETES_SERVICE_HOST KUBERNETES_SERVICE_PORT).each do |var|
+            raise "Expected environment variable #{var} is not set" unless ENV[var]
+          end
+
+          url = "https://#{ENV['KUBERNETES_SERVICE_HOST']}:#{ENV['KUBERNETES_SERVICE_PORT']}"
+          token_args = {
+            auth_options: {
+              bearer_token_file: File.join(KUBERNETES_SERVICEACCOUNT_DIR, 'token')
+            }
+          }
+
+          ssl_args = {
+            ssl_options: {
+              ca_file: File.join(KUBERNETES_SERVICEACCOUNT_DIR, 'ca.crt'),
+              verify_ssl: OpenSSL::SSL::VERIFY_PEER
+            }
+          }
+          $stderr.puts "Kubernetes.kube_client: FIXME"
+          url = 'http://localhost:8080'
+          Kubeclient::Client.new [ url, api ].join('/'), version, ssl_args.merge(token_args)
+        end
+
+        # Finds the pod which matches a request IP.
+        def pod_from_ip request_ip
+          # Use the fieldSelector but double-check in Ruby code.
+          kube_client.get_pods(fieldSelector: "status.podIP=#{request_ip}").find do |pod|
+            pod.status.podIP == request_ip
+          end
+        end
+      end
+
       def perform_authentication
-        role_ids = collect_role_ids
-        unless role_ids.member?(role.role_id)
-          Rails.logger.debug "Role #{role.role_id.inspect} not found in Kubernetes object list #{role_ids.inspect}"
+        unless pod
+          Rails.logger.debug "No pod found for request IP #{request_ip.inspect}"
           raise Exceptions::Unauthorized
         end
+
+        workload_namespace = resource.annotation('kubernetes/namespace') || 'default'
+        unless pod.metadata.namespace == workload_namespace
+          Rails.logger.debug "Pod #{pod.metadata.name} namespace #{pod.metadata.namespace.inspect} does not match expectation #{workload_namespace.inspect}"
+          raise Exceptions::Unauthorized
+        end
+
+        workload_name   = resource.annotation('kubernetes/workload-name') || resource.id.split('/')[-1]
+        workload_type = resource.annotation('kubernetes/workload-type') || 'deployment'
+        matcher = KubernetesWorkloadMatcher.matcher workload_type, workload_name
+
+        unless matcher.include? pod
+          Rails.logger.debug "Pod #{pod.metadata.name} is not part of #{workload_type} #{workload_id.inspect}"
+          raise Exceptions::Unauthorized
+        end
+
         true
       end
 
       protected
-
-      def account
-        role.account
-      end
 
       def rack_request
         @rack_request ||= Rack::Request.new(request.env)
@@ -29,90 +125,12 @@ module Provider
         ip ||= rack_request.ip
       end
 
-      def collect_role_ids
-        [ pod_id, replicaset_id, statefulset_id, deployment_id ].compact.map do |name|
-          name.unshift pod.metadata.namespace
-          name.unshift "kubernetes"
-          [ account, "host", name.join("/") ].join(":")
-        end
-      end
-
-      # Construct a replicaset id from the pod pod.metadata.ownerReferences.ReplicaSet,
-      def replicaset_id
-        def valid?
-          !pod.metadata.ownerReferences.select{|ref| ref.kind == "ReplicaSet"}.empty?
-        end
-
-        return nil unless valid?
-
-        pod.metadata.ownerReferences.select{|ref| ref.kind == "ReplicaSet"}.map do |ref|
-          [ "replicaset", ref.name ]
-        end
-      end
-
-      # Construct a deployment id from the pod pod.metadata.ownerReferences.ReplicaSet,
-      # where the replicaset name is "#{name}-#{replicaset.metadata.labels['pod-template-hash']"
-      def deployment_id
-        def valid?
-          pod.metadata.labels && 
-            ( template_hash = pod.metadata.labels['pod-template-hash'] ) &&
-            pod.metadata.ownerReferences &&
-            pod.metadata.ownerReferences.select{|ref| ref.kind == "ReplicaSet"}.find{|ref| ref.name =~ /-#{template_hash}$/}
-        end
-
-        return nil unless valid?
-
-        template_hash = pod.metadata.labels['pod-template-hash']
-        names = pod.metadata.ownerReferences.select{|ref| ref.kind == "ReplicaSet"}.map{|ref| ref.name =~ /(.*)-#{template_hash}$/; $1}
-        names.map do |name|
-          [ "deployment", name ]
-        end
-      end
-
-      # Construct a stateful set id from the pod "pod.metadata.created_by.reference".
-      def statefulset_id
-        def valid?
-          pod.metadata.annotations &&
-            ( created_by = pod.metadata.annotations['kubernetes.io/created-by'] ) &&
-            created_by['reference'] &&
-            created_by['reference']['kind'] &&
-            created_by['reference']['kind'] == 'StatefulSet'
-        end
-
-        return nil unless valid?
-
-        [ "statefulset", created_by['reference']['name'] ]
-      end
-
-      # Select all Pods that match the request ip.
-      def pod_id
-        [ "pod", pod.metadata.name ]
+      def resource
+        @resource ||= role.resource
       end
 
       def pod
-        @pod ||= find_pod
-      end
-
-      def find_pod
-        pods = kube_client.get_pods.select do |pod|
-          pod.status.podIP == request_ip
-        end
-        raise Exceptions::Unauthorized, "No pod matches request IP #{request_ip}" if pods.empty?
-        raise Exceptions::Unauthorized, "Multiple pods match request IP #{request_ip}" if pods.size > 1
-        pods.first
-      end
-
-      def kube_client
-        build_kubectl_client
-      end
-
-      # Different constructor parameters are required to examine stateful sets.
-      def kube_client_stateful_sets
-        build_kubectl_client api: 'apis/apps', version: 'v1beta1'
-      end
-
-      def build_kubectl_client api: "api", version: "v1"
-        Kubeclient::Client.new [ "http://localhost:8080", api ].join('/'), version
+        @pod ||= self.class.pod_from_ip request_ip
       end
     end
   end

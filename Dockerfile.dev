@@ -33,6 +33,8 @@ ADD Gemfile.lock .
 
 RUN bundle
 
+ADD . .
+
 RUN rm /etc/service/sshd/down
 RUN ln -sf /src/conjur-server/bin/conjurctl /usr/local/bin/
 

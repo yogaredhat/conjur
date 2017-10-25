@@ -18,13 +18,16 @@ Rails.application.routes.draw do
     end
 
     constraints account: /[^\/\?]+/ do
-      get  '/authn/:account/login' => 'login#login_basic'
+      get  '/authn/:account/login' => 'login#login'
       put  '/authn/:account/password' => 'credentials#update_password'
       put  '/authn/:account/api_key'  => 'credentials#rotate_api_key'
 
       constraints id: /[^\/\?]+/ do
-        post '/authn/:account/:id/authenticate' => 'authenticate#authenticate_basic'
-        post '/authn-kubernetes/:account/:id/authenticate' => 'authenticate#authenticate_kubernetes'
+        post '/authn/:account/:id/authenticate' => 'authenticate#authenticate'
+      end
+
+      constraints service_id: /.+/, id: /.+/ do
+        post '/authn-kubernetes/:service_id/:account/:id/authenticate' => 'kubernetes/authenticate#authenticate'
       end
 
       get "/roles/:account/:kind/*identifier" => "roles#memberships", :constraints => QueryParameterActionRecognizer.new("all")

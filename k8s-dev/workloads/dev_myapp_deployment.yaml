@@ -8,7 +8,7 @@ spec:
   template:
     metadata:
       labels:
-        app: myapp
+        app: myapp-deployment
     spec:
       containers:
       - image: authenticator
@@ -40,7 +40,6 @@ spec:
         volumeMounts:
         - mountPath: /run/conjur/
           name: conjur-access-token
-          readonly: true
 
       volumes:
         - name: conjur-access-token

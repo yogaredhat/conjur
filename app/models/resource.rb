@@ -106,6 +106,15 @@ class Resource < Sequel::Model
     end
   end
 
+  def annotation name
+    return nil if annotations.empty?
+    if a = annotations.find{|a| a.name == name}
+      a.value
+    else
+      nil
+    end
+  end
+
   def role
     Role[id] or raise "Role not found for #{id}"
   end

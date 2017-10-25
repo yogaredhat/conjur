@@ -1,0 +1,6 @@
+- !policy
+  id: conjur/authn-kubernetes/dev
+
+- !policy
+  id: myapp
+

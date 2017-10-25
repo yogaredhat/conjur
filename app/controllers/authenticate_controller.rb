@@ -1,6 +1,5 @@
 class AuthenticateController < ApplicationController
   include TokenGenerator
-  include HasProviders
 
   # Request path indicates the username for +authenticate+.
   # The specified role must always exist.
@@ -8,15 +7,10 @@ class AuthenticateController < ApplicationController
   # Load the authentication provider and check credentials.
   before_filter :perform_authentication
 
-  def authenticate_basic
+  def authenticate
     render json: authentication_token
   end
 
-  def authenticate_kubernetes
-    # TODO: issue a longer-lived token here.
-    render json: authentication_token
-  end
-  
   protected
 
   def authentication_token
@@ -24,7 +18,7 @@ class AuthenticateController < ApplicationController
   end
 
   def provider
-    lookup_provider(Provider::Authentication).new @role, request
+    Provider::Authentication::Basic.new(@role, request)
   end
   
   def perform_authentication

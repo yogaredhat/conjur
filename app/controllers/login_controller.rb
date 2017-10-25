@@ -1,6 +1,5 @@
 class LoginController < ApplicationController
   include BasicAuthenticator
-  include HasProviders
 
   # Perform the login strategy.
   before_filter :perform_login
@@ -11,7 +10,7 @@ class LoginController < ApplicationController
   # Ensure the credentials exist if they will be accessed or modified.
   before_filter :ensure_credentials
 
-  def login_basic
+  def login
     render_api_key
   end
 
@@ -21,12 +20,8 @@ class LoginController < ApplicationController
     render text: @role.credentials.api_key
   end
 
-  def provider
-    lookup_provider(Provider::Login).new account, authentication, request
-  end
-  
   def perform_login
-    provider.perform_login
+    Provider::Login::Basic.new(account, authentication, request).perform_login
   end
 
   def find_role

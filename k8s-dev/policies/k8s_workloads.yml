@@ -1,0 +1,16 @@
+- &hosts
+  - !host
+    id: myapp
+    annotations:
+      kubernetes/workload-type: deployment
+      kubernetes/namespace: conjur-dev
+
+  - !host
+    id: client
+    annotations:
+      kubernetes/workload-type: pod
+      kubernetes/namespace: conjur-dev
+
+- !grant
+  role: !layer      
+  members: *hosts

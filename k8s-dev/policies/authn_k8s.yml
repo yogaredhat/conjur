@@ -1,0 +1,28 @@
+- !webservice
+  annotations:
+    description: Authentication service for the dev cluster.
+
+- !group
+  id: clients
+  annotations:
+    description: > 
+      Members of this group can use the kubernetes/dev authentication service.
+      This group typically has one member, which is a layer containing the enrolled 
+      applications. 
+
+- !permit
+  resource: !webservice
+  privilege: [ read, authenticate ]
+  role: !group clients
+
+- !policy
+  id: workloads
+  annotations:
+    description: Kubernetes workloads.
+  body:
+    - !layer
+
+- !grant
+  role: !group clients
+  member: !layer workloads
+
