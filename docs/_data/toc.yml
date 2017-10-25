@@ -74,12 +74,6 @@
       variable: Variable
       webservice: Webservice
 
-"/tools/":
-  summon: Summon CLI
-
-"/tools/summon.html":
-  installation: Installation
-
 "/integrations/ansible.html":
   overview: Overview
   integration: How Conjur Integrates with Ansible

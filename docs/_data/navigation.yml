@@ -9,13 +9,7 @@ main:
       evaluate-conjur:
         title: Try Conjur
         path: /get-started/try-conjur.html
-  tools:
-    title: Tools
-    path: /tools/
-    items:
-      summon:
-        title: Summon
-        path: /tools/summon.html
+
   integrations:
     title: Integrations
     path: /integrations/
@@ -26,6 +20,9 @@ main:
       puppet:
         title: Puppet
         path: /integrations/puppet.html
+      summon:
+        title: Summon
+        path: /integrations/summon.html
 
   api:
     title: API

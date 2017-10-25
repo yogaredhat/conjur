@@ -2,7 +2,7 @@
 title: Ansible Integration
 layout: page
 section: integrations
-description: Conjur Integrations - Ansible Role
+description: Conjur Integrations - Ansible
 ---
 
 ## What is Ansible?
