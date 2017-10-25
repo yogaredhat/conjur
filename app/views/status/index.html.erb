@@ -1,19 +1,18 @@
-<% content_for :title do %>Conjur CE Status<% end %>
+<% content_for :title do %>Conjur Status<% end %>
 
 <div class="row">
   <div class="col-md-8">
     <h1 class="page-title">Status</h1>
-    <p class="font-large">Your Conjur CE server is running!</p>
+    <p class="font-large">Your Conjur server is running!</p>
   </div>
   <div class="col-md-4">
     <strong>Details:</strong>
-    <p class="note">Version <%=ENV["POSSUM_VERSION_APPLIANCE"]%></p>
+    <p class="note">Version <%= @version %></p>
 
     <strong>More Info:</strong>
     <ul class="note">
-      <li><a href="https://www.conjur.org/reference/" target="_blank">Documentation</a></li>
+      <li><a href="https://conjur.org/" target="_blank">Documentation</a></li>
       <li><a href="https://www.cyberark.com/products/privileged-account-security-solution/cyberark-conjur/" target="_blank">Conjur Enterprise</a></li>
-      <li><a href="https://www.conjur.org/" target="_blank">Conjur.org</a></li>
     </ul>
   </div>
 </div>
