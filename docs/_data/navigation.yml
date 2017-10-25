@@ -26,6 +26,7 @@ main:
       puppet:
         title: Puppet
         path: /integrations/puppet.html
+
   api:
     title: API
     path: /api/
@@ -63,6 +64,7 @@ main:
           delegation:
             title: Delegating Policy Management
             path: /tutorials/policy/delegation.html
+
       runtime:
         title: Runtime Solutions
         path: /tutorials/integrations/
