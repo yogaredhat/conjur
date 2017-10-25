@@ -71,11 +71,12 @@ group :development, :test do
 end
 
 group :website do
-  gem 'jekyll', group: :jekyll_plugins
+  gem 'jekyll', '= 3.4.3', group: :jekyll_plugins
   gem 'jekyll-coffeescript'
   gem 'jekyll-paginate'
   gem 'jekyll-redirect-from'
   gem 'jekyll-sitemap'
   gem 'rack-jekyll'
   gem 'html-proofer'
+  gem 'liquid', '~> 3'
 end

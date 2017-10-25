@@ -31,9 +31,12 @@ WORKDIR /src/conjur-server
 ADD Gemfile      .
 ADD Gemfile.lock .
 
-RUN bundle
+RUN bundle --without website
 
 ADD . .
+
+RUN mkdir -p .bundle
+RUN echo "BUNDLE_WITHOUT: website" > .bundle/config
 
 RUN rm /etc/service/sshd/down
 RUN ln -sf /src/conjur-server/bin/conjurctl /usr/local/bin/
