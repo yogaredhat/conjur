@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
 debify package \
-  conjur \
+  possum \
   -- \
   --depends tzdata

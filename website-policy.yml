@@ -1,16 +1,16 @@
-- !variable conjur/ci/web/password
+- !variable possum/ci/web/password
 
 - !permit
   role: !group developers
   privileges: [ read, execute ]
-  resource: !variable conjur/ci/web/password
+  resource: !variable possum/ci/web/password
 
 - !permit
   role: !layer ci/jenkins/executors
   privileges: [ read, execute ]
-  resource: !variable conjur/ci/web/password
+  resource: !variable possum/ci/web/password
 
 - !permit
   role: !group operations
   privileges: [ update ]
-  resource: !variable conjur/ci/web/password
+  resource: !variable possum/ci/web/password

@@ -1,4 +1,4 @@
 #!/bin/bash -e
 
-heroku run conjur db migrate
+heroku run conjurctl db migrate
 

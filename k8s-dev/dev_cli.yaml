@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client
+spec:
+  containers:
+  - image: conjurinc/cli5
+    name: cli5
+    imagePullPolicy: IfNotPresent
+    command: [ sleep ]
+    args: [ infinity ]
+    env:
+    - name: CONJUR_APPLIANCE_URL
+      value: http://conjur
+    - name: CONJUR_ACCOUNT
+      value: mycorp

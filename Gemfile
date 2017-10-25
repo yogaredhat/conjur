@@ -31,7 +31,7 @@ gem 'ruby_dep', '= 1.3.1'
 gem 'conjur-api', github: 'cyberark/api-ruby'
 gem 'conjur-rack', github: 'conjurinc/conjur-rack'
 gem 'conjur-rack-heartbeat'
-gem 'conjur-policy-parser', github: 'conjurinc/conjur-policy-parser', branch: 'conjur'
+gem 'conjur-policy-parser', github: 'conjurinc/conjur-policy-parser', branch: 'possum'
 gem 'rack-rewrite'
 
 gem 'simplecov', require: false

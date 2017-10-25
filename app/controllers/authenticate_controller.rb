@@ -18,7 +18,7 @@ class AuthenticateController < ApplicationController
   end
 
   def provider
-    Provider::Authentication::Basic.new(@role, request)
+    Provider::Authentication::Basic.new @role, request
   end
   
   def perform_authentication

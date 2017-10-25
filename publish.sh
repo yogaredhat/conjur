@@ -3,6 +3,6 @@
 export DEBUG=true
 export GLI_DEBUG=true
 
-COMPONENT=${1:-conjur}
+COMPONENT=${1:-possum}
 
-debify publish --component $COMPONENT $(cat VERSION_APPLIANCE) conjur
+debify publish --component $COMPONENT $(cat VERSION_APPLIANCE) possum

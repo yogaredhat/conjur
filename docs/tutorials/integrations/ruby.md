@@ -165,7 +165,7 @@ Next, let's create `Gemfile` to manage our dependencies:
 
 source "https://rubygems.org"
 
-gem 'conjur-api', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'conjur'
+gem 'conjur-api', '~> 5.0'
 gem 'sinatra', '~> 2.0'
 {% endhighlight %}
 
