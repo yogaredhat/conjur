@@ -1,6 +1,8 @@
 ---
 title: Reference - Policies
 layout: page
+section: reference
+description: Conjur Reference - Policies
 ---
 
 {% include toc.md key='introduction' %}

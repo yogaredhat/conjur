@@ -4,11 +4,12 @@ source 'https://rubygems.org'
 git_source(:github) { |name| "https://github.com/#{name}.git" }
 
 #ruby=ruby-2.2.6
-#ruby-gemset=possum
+#ruby-gemset=conjur
 
 gem 'rake'
 gem 'rails-api'
 gem 'rails', '~> 4.2'
+gem 'nokogiri', '>= 1.8.1'
 gem 'puma'
 
 gem 'sequel-rails'
@@ -27,8 +28,8 @@ gem 'gli', require: false
 # Gem::InstallError: ruby_dep requires Ruby version >= 2.2.5, ~> 2.2.
 gem 'ruby_dep', '= 1.3.1'
 
-gem 'conjur-api', github: 'conjurinc/api-ruby', branch: 'possum'
-gem 'conjur-rack', github: 'conjurinc/conjur-rack', branch: 'possum'
+gem 'conjur-api', github: 'cyberark/api-ruby'
+gem 'conjur-rack', github: 'conjurinc/conjur-rack'
 gem 'conjur-rack-heartbeat'
 gem 'conjur-policy-parser', github: 'conjurinc/conjur-policy-parser', branch: 'possum'
 gem 'rack-rewrite'
@@ -38,6 +39,7 @@ gem 'simplecov', require: false
 gem 'kubeclient'
 
 gem 'sass-rails'
+gem 'uglifier'
 gem 'therubyracer'
 gem 'bootstrap-sass', '~> 3.2.0'
 gem 'autoprefixer-rails'
@@ -63,12 +65,17 @@ group :development, :test do
   gem 'cucumber'
   gem 'aruba'
   gem 'rake_shared_context'
-  gem 'conjur-cli', github: 'conjurinc/cli-ruby', branch: 'possum'
+  gem 'conjur-cli', '~> 6'
   gem 'rails_layout'
+  gem 'rspec-core', '~> 3.0'
 end
 
 group :website do
-  gem 'github-pages', group: :jekyll_plugins
+  gem 'jekyll', group: :jekyll_plugins
+  gem 'jekyll-coffeescript'
+  gem 'jekyll-paginate'
+  gem 'jekyll-redirect-from'
+  gem 'jekyll-sitemap'
   gem 'rack-jekyll'
   gem 'html-proofer'
 end

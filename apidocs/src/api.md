@@ -1,8 +1,8 @@
 FORMAT: 1A
 
-# Conjur Community Edition API
+# Conjur API
 
-This is official documentation of the Conjur Community Edition API. It
+This is official documentation of the Conjur API. It
 allows you tremendous flexibility to control and manipulate your
 Conjur software.
 
@@ -15,7 +15,7 @@ Most API calls require an authentication access token in the header. Here's how 
 
 If you're a machine, your API key will be provided by your operator.
 
-Access tokens expire after 8 minutes. You need to obtain a new token after it expires. 
+Access tokens expire after 8 minutes. You need to obtain a new token after it expires.
 Token expiration and renewal is handled automatically by the
 Conjur client libraries.
 
@@ -44,11 +44,13 @@ A Variable is an access-controlled list of encrypted data values. The values in 
 
 Only the twenty most recent values in a Variable are retained; this prevents the database from growing without bounds.
 
-<!-- include(secrets.md) -->
+<!-- include(add_secret.md) -->
+
+<!-- include(retrieve_secret.md) -->
+
+<!-- include(batch_retrieval.md) -->
 
 # Group Policies
-
-## Policies [/policies/{account}/policy/{identifier}]
 
 <!-- include(replace_policy.md) -->
 
@@ -64,9 +66,17 @@ Only the twenty most recent values in a Variable are retained; this prevents the
 
 <!-- include(show_resource.md) -->
 
+<!-- include(show_permitted_roles.md) -->
+
+<!-- include(check_permission.md) -->
+
 # Group Host Factory
 
-<!-- include(host_factory.md) -->
+<!-- include(host_factory_create_tokens.md) -->
+
+<!-- include(host_factory_revoke_token.md) -->
+
+<!-- include(host_factory_create_host.md) -->
 
 # Group Public Keys
 

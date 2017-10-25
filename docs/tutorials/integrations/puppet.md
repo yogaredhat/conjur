@@ -1,6 +1,8 @@
 ---
 title: Tutorial - Puppet
 layout: page
+section: tutorials
+description: Conjur Tutorial - Puppet
 ---
 
 {% include toc.md key='introduction' %}
@@ -16,9 +18,8 @@ As a result, the "blast radius" of a compromised node or Puppet master is minimi
 
 {% include toc.md key='prerequisites' %}
 
-* A [Conjur server](/installation/server.html) endpoint.
-* The [Conjur CLI](/installation/client.html).
-* A client machine with the Puppet agent installed.
+* A [Conjur installation](/get-started/install-conjur.html)
+* A client machine with the Puppet agent installed
 
 {% include toc.md key='overview' %}
 
@@ -53,8 +54,8 @@ $ conjur policy load --replace root conjur.yml
 Loaded policy 'root'
 {
   "created_roles": {
-    "dev:host:myapp-01": {
-      "id": "dev:host:myapp-01",
+    "myorg:host:myapp-01": {
+      "id": "myorg:host:myapp-01",
       "api_key": "1wgv7h2pw1vta2a7dnzk370ger03nnakkq33sex2a1jmbbnz3h8cye9"
     }
   },
@@ -69,7 +70,7 @@ Next, we need to populate the database password with a secret value. Use the CLI
 {% highlight shell %}
 $ conjur list -k variable
 [
-  "dev:variable:db/password"
+  "myorg:variable:db/password"
 ]
 {% endhighlight %}
 
