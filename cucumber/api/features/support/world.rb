@@ -1,4 +1,4 @@
-module PossumWorld
+module ConjurWorld
   
   USER_NAMES = %w(auto-larry auto-mike auto-norbert auto-otto)
   
@@ -202,4 +202,4 @@ module PossumWorld
   end
 end
 
-World(PossumWorld)
+World(ConjurWorld)

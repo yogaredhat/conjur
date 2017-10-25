@@ -20,7 +20,7 @@ To perform this tutorial, you'll need Kubernetes. The easiest way to get Kuberne
 
 ### Conjur Server Image
 
-Once you have Minikube, you need to provide the `conjurinc/possum` Docker image to it. The easiest way to do this is to build it locally from source code into Minikube’s Docker.
+Once you have Minikube, you need to provide the `conjurinc/conjur` Docker image to it. The easiest way to do this is to build it locally from source code into Minikube’s Docker.
 
 * Select Minikube as your Docker engine
 
@@ -31,20 +31,20 @@ $ eval $(minikube docker-env)
 * Clone the Conjur server source code:
 
 {% highlight shell %}
-$ git clone -b feature/login-provider git@github.com:conjurinc/possum.git
-Cloning into 'possum'...
+$ git clone -b feature/login-provider git@github.com:conjurinc/conjur.git
+Cloning into 'conjur'...
 remote: Counting objects: 445, done.
 remote: Compressing objects: 100% (413/413), done.
 remote: Total 445 (delta 15), reused 250 (delta 11), pack-reused 0
 Receiving objects: 100% (445/445), 376.52 KiB | 0 bytes/s, done.
 Resolving deltas: 100% (15/15), done.
 Checking connectivity... done.
-$ cd possum
+$ cd conjur
 {% endhighlight %}
 
 * Build Conjur
 
-Make sure you are in the "possum" directory. Then run the build script:
+Make sure you are in the "conjur" directory. Then run the build script:
 
 {% highlight shell %}
 $ ./build.sh
@@ -107,7 +107,7 @@ deployment "pg" created
 Before you can run the Conjur server, you need to generate a data encryption key. Run the following commands in your shell:
 
 {% highlight shell %}
-$ data_key=$(docker run --rm conjurinc/possum data-key generate)
+$ data_key=$(docker run --rm conjurinc/conjur data-key generate)
 $ echo $data_key
 C5eQFJcSh34dLW51w/VDmeMOS5y9fl0P2ShjS+JVRSI=
 {% endhighlight %}
@@ -119,7 +119,7 @@ For tutorial purposes, we'll simply provide the data key to the Conjur server as
 
 We'll cover security hardening at the end of this tutorial.
 
-Create this file as `conjur.yaml`, replacing the `POSSUM_DATA_KEY` variable with the one you just created:
+Create this file as `conjur.yaml`, replacing the `CONJUR_DATA_KEY` variable with the one you just created:
 
 {% highlight yaml %}
 # conjur.yaml
@@ -147,14 +147,14 @@ spec:
         app: conjur
     spec:
       containers:
-      - image: conjurinc/possum
+      - image: conjurinc/conjur
         imagePullPolicy: IfNotPresent
         name: conjur
         args: [ server ]
         env:
         - name: DATABASE_URL
           value: postgres://postgres@pg/postgres
-        - name: POSSUM_DATA_KEY
+        - name: CONJUR_DATA_KEY
           value: C5eQFJcSh34dLW51w/VDmeMOS5y9fl0P2ShjS+JVRSI=
           
       - image: lachlanevenson/k8s-kubectl
@@ -197,7 +197,7 @@ $ kubectl exec -it $conjur_pod bash
 ... and create the account "mycorp":
 
 {% highlight shell %}
-$ possum account create mycorp
+$ conjur account create mycorp
 Created new account account 'mycorp'
 Token-Signing Public Key: -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3KH53gBcpwEzMlkbVMGc
@@ -534,12 +534,12 @@ In the logs for "myapp", you'll see the database password printed.
 
 ### Securing the Data Key
 
-In the basic walkthrough, the POSSUM_DATA_KEY is provided insecurely to the Conjur server.
+In the basic walkthrough, the CONJUR_DATA_KEY is provided insecurely to the Conjur server.
 
 Better options for providing the data key include:
 
-* **KMS** Store the data key in Amazon KMS, associated to the EC2 machine on which the Possum server is running.
-* **HSM** Store the data key in an HSM or Cloud HSM, associated to the machine on which the Possum server is running.
+* **KMS** Store the data key in Amazon KMS, associated to the EC2 machine on which the Conjur server is running.
+* **HSM** Store the data key in an HSM or Cloud HSM, associated to the machine on which the Conjur server is running.
 
 ### Separating Authentication Authorities
 

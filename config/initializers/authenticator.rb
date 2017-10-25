@@ -7,7 +7,7 @@ require 'patches/core_ext'
 Sequel.extension :migration
 
 # Token authentication is optional for authn routes, and it's not applied at all to authentication.
-Possum::Application.config.middleware.use Conjur::Rack::Authenticator, 
+Conjur::Application.config.middleware.use Conjur::Rack::Authenticator, 
   optional: [ /^\/authn\//, /^\/public_keys\// ], 
   except:   [ 
     /^\/authn(-\w+)?\/.*\/authenticate$/, 

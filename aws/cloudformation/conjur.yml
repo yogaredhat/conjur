@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Conjur CE Stack, backed by a PostgreSQL database on RDS
+Description: Conjur Stack, backed by a PostgreSQL database on RDS
 
 Parameters:
   ConjurAccount:
@@ -23,11 +23,11 @@ Parameters:
 
   ImageId:
     Type: AWS::EC2::Image::Id
-    Description: Conjur CE AMI
+    Description: Conjur AMI
 
   InstanceType:
     Type: String
-    Description: Type of Conjur CE EC2 instance
+    Description: Type of Conjur EC2 instance
     Default: t2.medium
 
   KeyName:
@@ -142,5 +142,5 @@ Resources:
 
 Outputs:
   ConjurAddress: 
-    Description: public IP address of Conjur CE instance
+    Description: public IP address of Conjur instance
     Value: !GetAtt ConjurInstance.PublicIp

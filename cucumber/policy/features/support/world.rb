@@ -13,7 +13,7 @@ module FullId
   end
 end
 
-module PossumWorld
+module ConjurWorld
   include FullId
   
   attr_reader :result
@@ -86,4 +86,4 @@ module PossumWorld
   end
 end
 
-World(PossumWorld)
+World(ConjurWorld)

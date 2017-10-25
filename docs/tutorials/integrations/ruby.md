@@ -165,11 +165,11 @@ Next, let's create `Gemfile` to manage our dependencies:
 
 source "https://rubygems.org"
 
-gem 'conjur-api', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'possum'
+gem 'conjur-api', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'conjur'
 gem 'sinatra', '~> 2.0'
 {% endhighlight %}
 
-Note that we're building the Conjur API gem from source rather than downloading it from Ruby Gems. The Conjur CE release marks a major overhaul of the API. This version will be published to Ruby Gems prior to our public release.
+Note that we're building the Conjur API gem from source rather than downloading it from Ruby Gems. The Conjur release marks a major overhaul of the API. This version will be published to Ruby Gems prior to our public release.
 
 Now we can install all our required gems with:
 

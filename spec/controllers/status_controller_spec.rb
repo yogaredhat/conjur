@@ -13,12 +13,13 @@ describe StatusController, :type => :controller do
 
       it 'has the standard message' do
         get :index
-        expect(response.body).to include('Your Conjur CE server is running!')
+        expect(response.body).to include('Your Conjur server is running!')
       end
 
       it 'includes the version' do
         get :index
-        expect(response.body).to include("Version #{ENV["POSSUM_VERSION_APPLIANCE"]}")
+        version = ENV['CONJUR_VERSION']
+        expect(response.body).to include("Version #{version}")
       end
     end
 

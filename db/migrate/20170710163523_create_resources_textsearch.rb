@@ -1,5 +1,5 @@
 # This migration has been ported over from Conjur v3's /authz project. I had to 
-# make a few changes for possum that have been documented with comments.
+# make a few changes for conjur that have been documented with comments.
 Sequel.migration do
   up do
     create_table :resources_textsearch do
@@ -25,7 +25,7 @@ Sequel.migration do
         -- id and name are A
 
         -- Translate chars that are not considered word separators by parser. Note that Conjur v3's /authz
-        -- did not include a period here. It has been added for possum.
+        -- did not include a period here. It has been added for conjur.
         -- Note: although ids are not english, use english dict so that searching is simpler, if less strict
         setweight(to_tsvector('pg_catalog.english', translate(identifier(resource.resource_id), './-', '   ')), 'A') ||
 
@@ -45,7 +45,7 @@ Sequel.migration do
     run "CREATE FUNCTION resource_update_textsearch() RETURNS trigger
         -- The loader orchestration logic changes the search path temporarily, which causes
         -- these triggers to be unable to find the tables and functions they need. Fix this
-        -- by setting the search path from the current schema each time. Added for possum.
+        -- by setting the search path from the current schema each time. Added for conjur.
         SET search_path FROM CURRENT
         LANGUAGE plpgsql
         AS $resource_update_textsearch$
@@ -70,7 +70,7 @@ Sequel.migration do
     run "CREATE FUNCTION annotation_update_textsearch() RETURNS trigger
         -- The loader orchestration logic changes the search path temporarily, which causes
         -- these triggers to be unable to find the tables and functions they need. Fix this
-        -- by setting the search path from the current schema each time. Added for possum.
+        -- by setting the search path from the current schema each time. Added for conjur.
         SET search_path FROM CURRENT
         LANGUAGE plpgsql
         AS $annotation_update_textsearch$

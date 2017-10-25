@@ -1,16 +1,16 @@
 {
   "name": "apidocs",
   "version": "1.0.0",
-  "description": "Official documentation of the Conjur CE API",
+  "description": "Official documentation of the Conjur API",
   "main": "api.md",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/conjurinc/possum/"
+    "url": "https://github.com/conjurinc/conjur/"
   },
-  "author": "CyberArk Conjur Team",
+  "author": "https://conjur.org",
   "license": "ISC",
   "devDependencies": {
     "aglio": "^2.3.0"

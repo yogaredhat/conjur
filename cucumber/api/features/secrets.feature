@@ -1,7 +1,7 @@
 @logged-in
 Feature: Adding and fetching secrets
 
-  Each resource in Possum has an associated list of "secrets", each of which is an arbitrary
+  Each resource in Conjur has an associated list of "secrets", each of which is an arbitrary
   piece of encrypted data. Access to secrets is governed by privileges:
 
   - **execute** permission to fetch the value of a secret

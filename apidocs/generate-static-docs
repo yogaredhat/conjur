@@ -5,7 +5,7 @@ aglio_options=""
 function showhelp() {
     cat <<EOF
 Usage: generate-static-docs [OPTION]... [FILE]
-Uses Aglio to generate static API documentation for Conjur CE.
+Uses Aglio to generate static API documentation for Conjur.
 
   -h display this help and exit
   -w start a dev server to watch for file updates and auto-refresh in browser

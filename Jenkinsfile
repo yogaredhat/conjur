@@ -69,7 +69,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        build job: 'release-heroku', parameters: [string(name: 'APP_NAME', value: 'possum-conjur')]
+        build job: 'release-heroku', parameters: [string(name: 'APP_NAME', value: 'conjur-conjur')]
       }
     }
   }
