@@ -4,7 +4,7 @@
 
 docker-compose build --pull docs
 
-docker run --rm conjur-docs htmlproofer \
+docker-compose run --rm docs htmlproofer \
   --check-external-hash \
   --disable-external \
   --enforce-https \
