@@ -21,7 +21,7 @@ module Kubernetes
 
     def service_lookup
       id = "#{account}:webservice:conjur/authn-kubernetes/#{service_id}"
-      @service ||= Resource[id] or raise RecordNotFound, "#{id.inspec} not found"
+      @service ||= Resource[id] or raise RecordNotFound, "#{id.inspect} not found"
     end
   end
 end

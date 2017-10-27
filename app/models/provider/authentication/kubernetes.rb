@@ -104,7 +104,7 @@ module Provider
         matcher = KubernetesWorkloadMatcher.matcher workload_type, workload_name
 
         unless matcher.include? pod
-          Rails.logger.debug "Pod #{pod.metadata.name} is not part of #{workload_type} #{workload_id.inspect}"
+          Rails.logger.debug "Pod #{pod.metadata.name} is not part of #{workload_type} #{workload_name.inspect}"
           raise Exceptions::Unauthorized
         end
 
