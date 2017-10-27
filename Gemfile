@@ -62,7 +62,7 @@ group :development, :test do
   gem 'ci_reporter_rspec'
   gem 'database_cleaner'
   gem 'parallel'
-  gem 'cucumber'
+  gem 'cucumber', '~> 2'
   gem 'aruba'
   gem 'rake_shared_context'
   gem 'conjur-cli', '~> 6'
