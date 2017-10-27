@@ -34,7 +34,7 @@ echo "kubectl exec -it conjur-dev -c conjur -- env CONJUR_APPLIANCE_URL=http://c
 echo "kubectl exec -it conjur-dev -c conjur -- env CONJUR_APPLIANCE_URL=http://conjur ./bin/cucumber-policy"
 
 echo To sync the local project 'app' directory to conjur-dev:
-echo ./sync_push.sh <dir>
-
-echo To sync the conjur-dev 'app' directory to your local project:
-echo kubectl cp conjur-dev:/src/conjur-server/app $(pwd)/../../app -c conjur
+echo " ./sync_push.sh app"
+echo
+echo To sync the conjur-dev Gemfile.lock to your local project:
+echo " ./sync_pull.sh Gemfile.lock"
