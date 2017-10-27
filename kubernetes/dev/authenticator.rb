@@ -8,7 +8,7 @@ Conjur.configuration.apply_cert_config!
 Conjur.log = $stderr
 
 filename = "/run/conjur/access-token"
-username = "host/kubernetes/#{ENV['K8S_NAMESPACE']}/deployment/myapp"
+username = ENV['CONJUR_AUTHN_LOGIN'] or raise "No CONJUR_AUTHN_LOGIN found in the environment"
 
 $stderr.puts "Authenticating at #{Conjur.configuration.authn_url}"
 $stderr.puts "Authenticating with username #{username.inspect}"

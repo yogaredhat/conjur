@@ -2,20 +2,20 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: conjur
+  name: conjur-dev
 spec:
   ports:
   - port: 80
     name: http
   selector:
-    app: conjur
+    app: conjur-dev
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: conjur
+  name: conjur-dev
   labels:
-    app: conjur
+    app: conjur-dev
 spec:
   containers:
   - image: conjur-dev
@@ -29,20 +29,9 @@ spec:
     - name: RAILS_ENV
       value: development
     - name: CONJUR_DATA_KEY
-      valueFrom:
-        secretKeyRef:
-          name: conjur-data-key
-          key: data-key
-    volumeMounts:
-    - mountPath: /src/conjur
-      name: local-dev
-      
+      value: LSiMFizXpMBkav5V4sYYs8mrcdhOjoiyB4iCFjhwbt4=
+
   - image: lachlanevenson/k8s-kubectl
     imagePullPolicy: IfNotPresent
     name: kubectl
     command: [ kubectl, proxy, "-p", "8080" ]
-
-  volumes:
-    - name: local-dev
-      hostPath:
-        path: /Users/kgilpin/source/conjur/conjur

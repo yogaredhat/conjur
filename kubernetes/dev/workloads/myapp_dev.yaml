@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-dev
+spec:
+  containers:
+  - image: myapp
+    imagePullPolicy: IfNotPresent
+    name: myapp
+    env:
+    - name: CONJUR_APPLIANCE_URL
+      value: http://conjur-dev
+    - name: CONJUR_AUTHN_URL
+      value: http://conjur-dev/authn-kubernetes/dev/
+    - name: CONJUR_ACCOUNT
+      value: cucumber
+    - name: CONJUR_AUTHN_LOGIN
+      value: host/conjur/authn-kubernetes/dev/workloads/myapp-dev

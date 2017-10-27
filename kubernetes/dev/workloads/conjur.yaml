@@ -18,31 +18,19 @@ metadata:
     app: conjur
 spec:
   containers:
-  - image: conjur-dev
+  - image: conjur
     imagePullPolicy: IfNotPresent
     name: conjur
-    command: [ sleep ]
-    args: [ infinity ]
+    args: [ server ]
     env:
     - name: DATABASE_URL
       value: postgres://postgres@pg/postgres
     - name: RAILS_ENV
       value: development
     - name: CONJUR_DATA_KEY
-      valueFrom:
-        secretKeyRef:
-          name: conjur-data-key
-          key: data-key
-    volumeMounts:
-    - mountPath: /src/conjur
-      name: local-dev
-      
+      value: LSiMFizXpMBkav5V4sYYs8mrcdhOjoiyB4iCFjhwbt4=
+
   - image: lachlanevenson/k8s-kubectl
     imagePullPolicy: IfNotPresent
     name: kubectl
     command: [ kubectl, proxy, "-p", "8080" ]
-
-  volumes:
-    - name: local-dev
-      hostPath:
-        path: /Users/kgilpin/source/conjur/conjur

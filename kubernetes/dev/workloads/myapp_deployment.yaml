@@ -18,9 +18,11 @@ spec:
         - name: CONJUR_APPLIANCE_URL
           value: http://conjur
         - name: CONJUR_AUTHN_URL
-          value: http://conjur/authn-kubernetes
+          value: http://conjur/authn-kubernetes/dev
+        - name: CONJUR_AUTHN_LOGIN
+          value: host/conjur/authn-kubernetes/dev/workloads/myapp-deployment
         - name: CONJUR_ACCOUNT
-          value: mycorp
+          value: cucumber
         - name: K8S_NAMESPACE
           valueFrom:
             fieldRef:

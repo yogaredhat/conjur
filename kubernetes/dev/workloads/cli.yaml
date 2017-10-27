@@ -14,7 +14,7 @@ spec:
     - name: CONJUR_APPLIANCE_URL
       value: http://conjur
     - name: CONJUR_ACCOUNT
-      value: mycorp
+      value: cucumber
     volumeMounts:
     - mountPath: /src/conjur
       name: local-dev

@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: myapp
+  name: myapp-pod
 spec:
   containers:
   - image: authenticator
@@ -12,9 +12,11 @@ spec:
     - name: CONJUR_APPLIANCE_URL
       value: http://conjur
     - name: CONJUR_AUTHN_URL
-      value: http://conjur/authn-kubernetes
+      value: http://conjur/authn-kubernetes/dev/
     - name: CONJUR_ACCOUNT
-      value: mycorp
+      value: cucumber
+    - name: CONJUR_AUTHN_LOGIN
+      value: host/conjur/authn-kubernetes/dev/workloads/myapp
     - name: K8S_NAMESPACE
       valueFrom:
         fieldRef:
@@ -30,11 +32,10 @@ spec:
     - name: CONJUR_APPLIANCE_URL
       value: http://conjur
     - name: CONJUR_ACCOUNT
-      value: mycorp
+      value: cucumber
     volumeMounts:
     - mountPath: /run/conjur/
       name: conjur-access-token
-      readonly: true
 
   volumes:
     - name: conjur-access-token
