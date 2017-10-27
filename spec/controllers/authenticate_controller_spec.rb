@@ -28,7 +28,7 @@ describe AuthenticateController, :type => :controller do
     end
   end
 
-  describe "#authenticate_basic" do
+  describe "#authenticate" do
     include_context "create user"
     
     RSpec::Matchers.define :have_valid_token_for do |login|
@@ -42,7 +42,7 @@ describe AuthenticateController, :type => :controller do
     end
     
     def invoke
-      post :authenticate_basic, { account: account, id: login }
+      post :authenticate, { account: account, id: login }
     end
         
     context "with password" do
@@ -61,7 +61,7 @@ describe AuthenticateController, :type => :controller do
 
     context "with non-existent user" do
       def invoke
-        post :authenticate_basic, account: account, id: 'santa-claus'
+        post :authenticate, account: account, id: 'santa-claus'
       end
 
       it_fails_with 401

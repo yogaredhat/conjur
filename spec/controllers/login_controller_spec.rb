@@ -4,10 +4,10 @@ describe LoginController, :type => :controller do
   let(:login) { "u-#{random_hex}" }
   let(:account) { "rspec" }
 
-  context "#login_basic" do
+  context "#login" do
     shared_examples_for "successful login" do
       it "succeeds" do
-        get :login_basic, params
+        get :login, params
         expect(response).to be_ok
         expect(response.body.length).to be >= 44
       end
@@ -15,7 +15,7 @@ describe LoginController, :type => :controller do
     
     shared_examples_for "login denied" do
       it "is unauthorized" do
-        get :login_basic, account: account
+        get :login, account: account
         expect(response.code).to eq("401")
       end
     end
