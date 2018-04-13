@@ -1,5 +1,6 @@
 namespace :"account" do
   def signing_key_key account
+    fail "account name required" unless account && !account.empty?
     [ "authn", account ].join(":")
   end
 
@@ -23,6 +24,13 @@ namespace :"account" do
     end
   end
 
+  desc "Enroll a token-signing key for an authentication realm"
+  task :enroll, %i(account) => :environment do |t, args|
+    kname = signing_key_key args[:account]
+    key = Slosilo[kname] = Slosilo::Key.new $stdin
+    puts "%s = MD5 %s" % [kname, nice_hex(key.fingerprint)]
+  end
+
   desc "Delete an account"
   task :delete, [ "account" ] => [ "environment" ] do |t,args|
     begin
@@ -32,5 +40,11 @@ namespace :"account" do
       $stderr.puts "Account '#{args[:account]}' not found"
       exit 1
     end
+  end
+
+  private
+
+  def nice_hex hex
+    hex.scan(/../).join(':')
   end
 end
