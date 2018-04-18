@@ -1,4 +1,5 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -ex
 
 # shellcheck disable=SC1091
 
@@ -33,4 +34,4 @@ api_key=$(docker-compose exec conjur conjurctl \
   role retrieve-key cucumber:user:admin | tr -d '\r')
 
 docker-compose run --rm -e CONJUR_AUTHN_API_KEY=$api_key cucumber -c \
-  'bundle exec rake jenkins:core:cucumber-api'
+  'bundle exec rake jenkins:authn-ldap:cucumber'
