@@ -8,16 +8,17 @@
 Dir[File.expand_path("../domain/authentication/**/*.rb", __dir__)].each do |f|
   require f
 end
-
+  
 class AuthenticateController < ApplicationController
 
   def authenticate
 
     authentication_token = ::Authentication::Strategy.new(
       authenticators: ::Authentication::InstalledAuthenticators.new(ENV),
+      audit_log: ::Authentication::AuditLog,
       security: nil,
       env: ENV,
-      role_class: ::Authentication::MemoizedRole,
+      role_cls: ::Role,
       token_factory: TokenFactory.new
     ).conjur_token(
       ::Authentication::Strategy::Input.new(

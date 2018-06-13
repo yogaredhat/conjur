@@ -1,7 +1,7 @@
 require 'ostruct'
 
 class Audit::Event::Authn < OpenStruct
-  def initialize role:, service: nil, authenticator_name:
+  def initialize role_id:, service_id:, authenticator_name:
     super
   end
 
@@ -29,14 +29,6 @@ class Audit::Event::Authn < OpenStruct
 
   def service_message_part
     " service #{service_id}" if service_id
-  end
-
-  def role_id
-    role.id
-  end
-
-  def service_id
-    service.try :id
   end
 
   def success?
