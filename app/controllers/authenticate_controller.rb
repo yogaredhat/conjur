@@ -10,9 +10,7 @@ Dir[File.expand_path("../domain/authentication/**/*.rb", __dir__)].each do |f|
 end
 
 class AuthenticateController < ApplicationController
-
   def authenticate
-
     authentication_token = ::Authentication::Strategy.new(
       authenticators: ::Authentication::InstalledAuthenticators.new(ENV),
       security: nil,
@@ -21,7 +19,7 @@ class AuthenticateController < ApplicationController
       token_factory: TokenFactory.new
     ).conjur_token(
       ::Authentication::Strategy::Input.new(
-        authenticator_name: params[:authenticator],
+        authenticator_name: authenticator_name,
         service_id:         params[:service_id],
         account:            params[:account],
         username:           params[:id],
@@ -29,9 +27,37 @@ class AuthenticateController < ApplicationController
       )
     )
     render json: authentication_token
+    audit_event.emit_success
   rescue => e
     logger.debug("Authentication Error: #{e.message}")
+    audit_event.emit_failure e.message
     raise Unauthorized
   end
 
+  private
+
+  def audit_event
+    @audit_event ||= Audit::Event::Authn.new \
+      role: target_role,
+      authenticator_name: authenticator_name,
+      service: service
+  end
+
+  # TODO: DRY these up with the authenticator in one way or another
+
+  def target_role
+    @target_role ||= Role.by_login(params[:id], account: account) or raise Unauthorized
+  end
+
+  def authenticator_name
+    @authenticator_name ||= params[:authenticator]
+  end
+
+  def account
+    @account ||= params[:account] or raise ArgumentError, 'account required'
+  end
+
+  def service
+    @service ||= Resource[account, 'webservice'.freeze, params[:service_id]]
+  end
 end
