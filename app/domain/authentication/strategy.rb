@@ -14,25 +14,18 @@ module Authentication
 
     class Input < ::Dry::Struct
       attribute :authenticator_name, Types::NonEmptyString
-      attribute :service_id,         Types::NonEmptyString.optional
-      attribute :account,            Types::NonEmptyString
-      attribute :username,           Types::NonEmptyString
-      attribute :password,           Types::NonEmptyString
+      attribute :service, Types::Any.optional
+      attribute :role, Types::Any
+      attribute :password, Types::NonEmptyString
 
       # Convert this Input to an Security::AccessRequest
       #
       def to_access_request(env)
         ::Authentication::Security::AccessRequest.new(
-          webservice: Webservice.new(
-            account:            account,
-            authenticator_name: authenticator_name,
-            service_id:         service_id
-          ),
-          whitelisted_webservices: Webservices.from_string(
-            account, env['CONJUR_AUTHENTICATORS'] ||
-                       Authentication::Strategy.default_authenticator_name
-          ),
-          user_id: username
+          webservice: service,
+          whitelisted_webservices: 
+            env['CONJUR_AUTHENTICATORS'].split(',') || Authentication::Strategy.default_authenticator_name,
+          role: role
         )
       end
     end
@@ -77,8 +70,8 @@ module Authentication
 
     def new_token(input)
       token_factory.signed_token(
-        account: input.account,
-        username: input.username
+        account: input.role.account,
+        username: Role.username_from_roleid(input.role.id)
       )
     end
   end

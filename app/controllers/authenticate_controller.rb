@@ -15,15 +15,13 @@ class AuthenticateController < ApplicationController
       authenticators: ::Authentication::InstalledAuthenticators.new(ENV),
       security: nil,
       env: ENV,
-      role_class: ::Authentication::MemoizedRole,
       token_factory: TokenFactory.new
     ).conjur_token(
       ::Authentication::Strategy::Input.new(
         authenticator_name: authenticator_name,
-        service_id:         params[:service_id],
-        account:            params[:account],
-        username:           params[:id],
-        password:           request.body.read
+        password: request.body.read
+        role: target_role,
+        service: service
       )
     )
     render json: authentication_token
@@ -43,8 +41,6 @@ class AuthenticateController < ApplicationController
       service: service
   end
 
-  # TODO: DRY these up with the authenticator in one way or another
-
   def target_role
     @target_role ||= Role.by_login(params[:id], account: account) or raise Unauthorized
   end
@@ -56,8 +52,12 @@ class AuthenticateController < ApplicationController
   def account
     @account ||= params[:account] or raise ArgumentError, 'account required'
   end
+  
+  def service_name
+    [authenticator_name, params[:service_id]].compact.join '/'
+  end
 
   def service
-    @service ||= Resource[account, 'webservice'.freeze, params[:service_id]]
+    @service ||= Resource[account, 'webservice'.freeze, service_name]
   end
 end

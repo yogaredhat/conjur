@@ -14,13 +14,12 @@ module Authentication
       "User '{0}' is not authorized in the Conjur policy")
 
     class AccessRequest < ::Dry::Struct
-      attribute :webservice, ::Types.Instance(::Authentication::Webservice)
-      attribute :whitelisted_webservices, 
-        ::Types.Instance(::Authentication::Webservices)
-      attribute :user_id, ::Types::NonEmptyString
+      attribute :webservice, ::Types::Any
+      attribute :whitelisted_webservices, ::Types::Array
+      attribute :role, ::Types::Any
 
       def validate
-        is_whitelisted = whitelisted_webservices.include?(webservice)
+        is_whitelisted = whitelisted_webservices.include?(webservice.identifier.split('/').last)
         raise NotWhitelisted, webservice.name unless is_whitelisted
       end
     end
