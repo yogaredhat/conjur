@@ -9,11 +9,11 @@ module Audit
       message_id 'fetch'
 
       def success_message
-        format "%s fetched %s%s", user.id, version_message_part, resource.id
+        format '%s fetched %s%s', user.id, version_message_part, resource.id
       end
 
       def failure_message
-        format "%s tried to fetch %s%s", user.id, version_message_part, resource.id
+        format '%s tried to fetch %s%s', user.id, version_message_part, resource.id
       end
 
       def structured_data
@@ -29,7 +29,7 @@ module Audit
       private
 
       def version_message_part
-        format "version %d of ", version if version
+        format 'version %d of ', version if version
       end
     end
   end

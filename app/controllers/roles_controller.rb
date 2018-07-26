@@ -28,7 +28,7 @@ class RolesController < RestController
   #
   # For each membership, return the full details of the grant as a
   # JSON object.
-  # 
+  #
   #
   # +params[:filter]+ and +params[:count]+ are handled as for +#all_memberships+
   #
@@ -36,7 +36,7 @@ class RolesController < RestController
     memberships = filtered_roles(role.memberships_as_member_dataset, membership_filter)
     render_dataset(memberships)
   end
-  
+
   # Find all members of this role.
   #
   # For each member, return the full details of the grant as a
@@ -115,36 +115,36 @@ class RolesController < RestController
   def role
     @role ||= Role[role_id]
     raise Exceptions::RecordNotFound, role_id unless @role
-    return @role
+    @role
   end
 
   def role_id
-    [ params[:account], params[:kind], params[:identifier] ].join(":")
+    [params[:account], params[:kind], params[:identifier]].join(':')
   end
 
   def filter_params
     request.query_parameters.slice(:search, :kind).symbolize_keys
   end
-  
+
   def render_params
     params.slice(:limit, :offset).symbolize_keys
   end
 
-  def membership_filter        
+  def membership_filter
     filter = params[:filter]
-    filter = Array(filter).map{ |id| Role.make_full_id id, account } if filter
-    return filter
+    filter = Array(filter).map { |id| Role.make_full_id id, account } if filter
+    filter
   end
 
   def filtered_roles(roles, filter)
     filter ? roles.member_of(filter) : roles
   end
 
-  def render_dataset(dataset, &block)
+  def render_dataset(dataset)
     resp = count_only?  ? count_payload(dataset) :
            block_given? ? yield(dataset)         : dataset.all
 
-    render json: resp    
+    render json: resp
   end
 
   def count_only?
@@ -154,6 +154,4 @@ class RolesController < RestController
   def count_payload(dataset)
     { count: dataset.count }
   end
-
-
 end

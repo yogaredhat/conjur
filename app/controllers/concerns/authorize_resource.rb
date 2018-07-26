@@ -2,12 +2,12 @@
 
 module AuthorizeResource
   extend ActiveSupport::Concern
-  
+
   included do
     include CurrentUser
   end
-  
-  def authorize privilege, resource = self.resource
+
+  def authorize(privilege, resource = self.resource)
     auth(current_user, privilege, resource)
   end
 

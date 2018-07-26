@@ -4,7 +4,6 @@ require 'iso8601'
 
 module Rotation
   class MasterRotator
-
     # We inject both the rotation_model and the secret_model to ease unit
     # testing, and also because, even though the rotation query code was thrown
     # into Secret, it should probably be refactored out into its own model
@@ -60,7 +59,7 @@ module Rotation
 
       def run
         rotator.rotate(@facade)
-      rescue => e
+      rescue StandardError => e
         set_retry_expiration
         log_error(e)
       end
@@ -96,6 +95,5 @@ module Rotation
         @avail_rotators[rotator_name]
       end
     end
-
   end
 end

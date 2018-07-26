@@ -7,18 +7,20 @@ require 'authentication/webservices'
 
 module Authentication
   class Security < ::Dry::Struct
-
     NotWhitelisted = ::Util::ErrorClass.new(
-      "'{0}' not whitelisted in CONJUR_AUTHENTICATORS")
+      "'{0}' not whitelisted in CONJUR_AUTHENTICATORS"
+    )
     ServiceNotDefined = ::Util::ErrorClass.new(
-      "Webservice '{0}' is not defined in the Conjur policy")
+      "Webservice '{0}' is not defined in the Conjur policy"
+    )
     NotAuthorizedInConjur = ::Util::ErrorClass.new(
-      "User '{0}' is not authorized in the Conjur policy")
+      "User '{0}' is not authorized in the Conjur policy"
+    )
 
     class AccessRequest < ::Dry::Struct
       attribute :webservice, ::Types.Instance(::Authentication::Webservice)
-      attribute :whitelisted_webservices, 
-        ::Types.Instance(::Authentication::Webservices)
+      attribute :whitelisted_webservices,
+                ::Types.Instance(::Authentication::Webservices)
       attribute :user_id, ::Types::NonEmptyString
 
       def validate
@@ -61,5 +63,4 @@ module Authentication
       raise NotAuthorizedInConjur, req.user_id unless has_access
     end
   end
-
 end

@@ -5,8 +5,8 @@ module Audit
   module SDID
     # Conjur's Private Enterprise Number
     # cf. https://pen.iana.org
-    CONJUR_PEN = 43868
-    def self.conjur_sdid label
+    CONJUR_PEN = 43_868
+    def self.conjur_sdid(label)
       [label, CONJUR_PEN].join('@').intern
     end
 

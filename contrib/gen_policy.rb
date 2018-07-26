@@ -17,21 +17,21 @@ require 'active_support/core_ext'
 
 # generate a random alphanumeric tag
 # (no attempt at uniqueness, adjust TAG_LEN or rerun on conflict)
-def tag length = TAG_LEN
-  alnum = [*?a..?z, *?0..?9].freeze
+def tag(length = TAG_LEN)
+  alnum = [*'a'..'z', *'0'..'9'].freeze
   length.times.map { alnum.sample }.join
 end
 
 module PolEncoder
-  def encode_with c
-    c.tag = self.class.name.downcase.prepend ?!
-    c.map = self.to_h.stringify_keys
+  def encode_with(c)
+    c.tag = self.class.name.downcase.prepend '!'
+    c.map = to_h.stringify_keys
   end
 end
 
 class Entity < OpenStruct
   include PolEncoder
-  def initialize id = tag, **ka
+  def initialize(id = tag, **ka)
     super id: id, **ka
   end
 end
@@ -40,19 +40,19 @@ Group = Class.new Entity
 Variable = Class.new Entity
 
 class Policy < Entity
-  def initialize *a
+  def initialize(*a)
     super
     self.body = block_given? ? yield : []
   end
 end
 
-Allgroups = []
+Allgroups = [].freeze
 
 Permit = Struct.new :role, :privilege, :resource
 Grant = Struct.new :role, :member
 [Permit, Grant].each { |x| x.include PolEncoder }
 
-def app_policy nvars = NUM_VARS
+def app_policy(nvars = NUM_VARS)
   Policy.new do
     vars = nvars.times.map { Variable.new }
     updaters = Group.new 'updaters'
@@ -68,11 +68,11 @@ def app_policy nvars = NUM_VARS
   end
 end
 
-def toplevel napp = NUM_APP
+def toplevel(napp = NUM_APP)
   Policy.new { napp.times.map { app_policy } }
 end
 
-toplevels = NUM_TOPLEVEL.times.map{toplevel}
+toplevels = NUM_TOPLEVEL.times.map { toplevel }
 
 User = Class.new Entity
 users = NUM_USERS.times.map { User.new }
@@ -80,7 +80,7 @@ groups = NUM_GROUPS.times.map { Group.new }
 
 # pick a random number usually =1 but occasionally higher
 def pick
-  Math.sqrt(1/rand).floor
+  Math.sqrt(1 / rand).floor
 end
 
 # grant user to some groups
@@ -97,4 +97,3 @@ entitlements = groups.map do |g|
 end.flatten
 
 puts [*toplevels, *users, *groups, *group_grants, *entitlements].to_yaml
-

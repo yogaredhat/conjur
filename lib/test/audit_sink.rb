@@ -8,13 +8,13 @@ module Test
       listen
     end
 
-    def listen backlog = 1
+    def listen(backlog = 1)
       socket.listen backlog
       Thread.new { loop { handle socket.accept } }
-        .abort_on_exception = true # to ease debugging
+            .abort_on_exception = true # to ease debugging
     end
 
-    def handle sock
+    def handle(sock)
       sock.each_line(&messages.method(:push))
     end
 
@@ -28,7 +28,7 @@ module Test
       def instance
         @instance ||= new
       end
-      
+
       extend Forwardable
       def_delegators :instance, :messages
     end

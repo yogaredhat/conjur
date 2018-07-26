@@ -3,7 +3,7 @@
 class PoliciesController < RestController
   include FindResource
   include AuthorizeResource
-  
+
   before_filter :current_user
   before_filter :find_or_create_root_policy
 
@@ -27,7 +27,7 @@ class PoliciesController < RestController
 
   protected
 
-  def load_policy perform_automatic_deletion:, delete_permitted:, update_permitted:
+  def load_policy(perform_automatic_deletion:, delete_permitted:, update_permitted:)
     policy_text = request.raw_post
 
     policy_version = PolicyVersion.new \
@@ -40,11 +40,10 @@ class PoliciesController < RestController
     loader.load
 
     created_roles = loader.new_roles.select do |role|
-      %w(user host).member?(role.kind)
-    end.inject({}) do |memo, role|
+      %w[user host].member?(role.kind)
+    end.each_with_object({}) do |role, memo|
       credentials = Credentials[role: role] || Credentials.create(role: role)
       memo[role.id] = { id: role.id, api_key: credentials.api_key }
-      memo
     end
 
     render json: {

@@ -2,7 +2,7 @@
 
 Sequel.migration do
   up do
-    execute """
+    execute ''"
       CREATE OR REPLACE FUNCTION visible_resources(role_id text)
       RETURNS SETOF resources
       LANGUAGE sql STABLE STRICT AS $$
@@ -18,9 +18,9 @@ Sequel.migration do
             owner_id IN (SELECT role_id FROM all_roles)
             OR resource_id IN (SELECT resource_id FROM permitted)
       $$
-    """
+    "''
 
-    execute """
+    execute ''"
       CREATE OR REPLACE FUNCTION is_resource_visible(resource_id text, role_id text)
       RETURNS boolean
       LANGUAGE sql STABLE STRICT AS $$
@@ -45,11 +45,11 @@ Sequel.migration do
             LIMIT 1 -- early cutoff: abort search if found
         ) AS found
       $$;
-    """
+    "''
   end
 
   down do
-    execute "DROP FUNCTION is_resource_visible(text, text)"
-    execute "DROP FUNCTION visible_resources(text)"
+    execute 'DROP FUNCTION is_resource_visible(text, text)'
+    execute 'DROP FUNCTION visible_resources(text)'
   end
 end

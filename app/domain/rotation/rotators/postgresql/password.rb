@@ -5,10 +5,8 @@ require 'pg'
 module Rotation
   module Rotators
     module Postgresql
-
       class Password
-
-        PASSWORD_LENGTH_ANNOTATION = 'rotation/postgresql/password/length'
+        PASSWORD_LENGTH_ANNOTATION = 'rotation/postgresql/password/length'.freeze
 
         def initialize(password_factory: ::Rotation::Password, pg: ::PG)
           @password_factory = password_factory
@@ -21,14 +19,13 @@ module Rotation
         #
         # NOTE: Both 2 and 3 are executed inside a single transaction, so either
         #       both updates happen, or neither do.
-        #  
+        #
         # NOTE: The order matters:
         #       1. Capture the *current* credentials
         #       2. The Database object `db` then uses those to perform the
         #          update to the new credentials.
         #
         def rotate(facade)
-
           resource_id = facade.rotated_variable.resource_id
           credentials = DbCredentials.new(facade)
           new_pw      = new_password(facade)
@@ -51,7 +48,6 @@ module Rotation
         end
 
         class DbCredentials
-
           # NOTE: It's important that @credentials is initialized on
           #       intialization, because we need to capture the *current*
           #       credentials so that we can access the db to *update* to
@@ -99,7 +95,6 @@ module Rotation
         end
 
         class Database
-
           def initialize(credentials, pg)
             @credentials = credentials
             @pg = pg
@@ -120,9 +115,7 @@ module Rotation
             connection
           end
         end
-
       end
-
     end
   end
 end

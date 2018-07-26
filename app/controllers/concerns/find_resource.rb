@@ -2,11 +2,11 @@
 
 module FindResource
   extend ActiveSupport::Concern
-  
+
   protected
-  
+
   def resource_id
-    [ params[:account], params[:kind], params[:identifier] ].join(":")
+    [params[:account], params[:kind], params[:identifier]].join(':')
   end
 
   def resource!
@@ -23,5 +23,5 @@ module FindResource
     else
       raise Exceptions::RecordNotFound, resource_id unless resource_visible?
     end
-  end  
+  end
 end

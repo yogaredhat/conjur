@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 When(/I retrieve the list of authenticators/) do
-  step "I successfully GET \"/authenticators\""
+  step 'I successfully GET "/authenticators"'
 end
 
 Then(/^the (\S+) authenticators contains "([^"]*)"$/) do |category, value|

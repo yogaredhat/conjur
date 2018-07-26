@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require File.expand_path('../boot', __FILE__)
+require File.expand_path('boot', __dir__)
 
-require "action_controller/railtie"
-require "sequel_rails"
+require 'action_controller/railtie'
+require 'sequel_rails'
 
 Bundler.require(*Rails.groups)
-require "conjur_audit"
+require 'conjur_audit'
 
 module Dummy
   # Dummy application used for tests

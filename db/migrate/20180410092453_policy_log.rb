@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 Sequel.migration do
-  tables = %i(roles role_memberships resources permissions annotations)
+  tables = %i[roles role_memberships resources permissions annotations]
 
   up do
-    execute """
+    execute ''"
       CREATE TYPE policy_log_op AS ENUM ('INSERT', 'DELETE', 'UPDATE');
       CREATE TYPE policy_log_kind AS ENUM #{literal tables.map(&:to_s)};
       CREATE EXTENSION IF NOT EXISTS hstore;
-    """
+    "''
 
-    key = %i(policy_id version)
+    key = %i[policy_id version]
     create_table :policy_log do
       String :policy_id, null: false
       Integer :version, null: false
@@ -25,8 +25,8 @@ Sequel.migration do
 
     tables.each do |table|
       # find the primary key of the table
-      primary_key = schema(table).select{|x,s|s[:primary_key]}.map(&:first).map(&:to_s).pg_array
-      execute """
+      primary_key = schema(table).select { |_x, s| s[:primary_key] }.map(&:first).map(&:to_s).pg_array
+      execute ''"
         CREATE OR REPLACE FUNCTION policy_log_#{table}() RETURNS TRIGGER AS $$
           DECLARE
             subject #{table};
@@ -67,22 +67,22 @@ Sequel.migration do
           FOR EACH ROW
           WHEN (OLD.policy_id IS NOT NULL)
           EXECUTE PROCEDURE policy_log_#{table}();
-      """
+      "''
     end
   end
 
   down do
     tables.each do |table|
-      execute """
+      execute ''"
         DROP TRIGGER policy_log ON #{table};
         DROP TRIGGER policy_log_d ON #{table};
         DROP FUNCTION policy_log_#{table}();
-      """
+      "''
     end
 
     drop_table :policy_log
 
-    %w(op kind).each do |t|
+    %w[op kind].each do |t|
       execute "DROP TYPE policy_log_#{t}"
     end
   end

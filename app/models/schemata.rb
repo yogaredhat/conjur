@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Manages the schema search path and identifies the primary schema (the one to which 
+# Manages the schema search path and identifies the primary schema (the one to which
 # SQL and DDL operations will apply by default).
 #
 # The default Postgresql schema search path is "$user, public", where the "$user"
 # indicates a schema whose name matches the authenticated user. If the $user schema
-# doesn't exist, it is ignored. As a result, SQL and DDL operations normally apply 
+# doesn't exist, it is ignored. As a result, SQL and DDL operations normally apply
 # to the "public" schema unless a schema is indicated specifically (e.g. "myschema.mytable").
 #
 # Possum can be configure with an alternative search path, such as "possum, public". In this case,
@@ -26,7 +26,7 @@ class Schemata
     end
 
     # Verify that there is a primary schema in the DB
-    primary_schema = db.select(Sequel::function(:current_schema)).single_value
+    primary_schema = db.select(Sequel.function(:current_schema)).single_value
     raise "No primary schema is available from search path #{search_path.inspect}" if primary_schema.nil?
 
     Rails.logger.info "Primary schema is #{primary_schema.inspect}"
@@ -38,29 +38,29 @@ class Schemata
       schemata.primary_schema
     end
 
-    def model_for_table table
-      Sequel::Model [ primary_schema, table ].join("__").to_sym
+    def model_for_table(table)
+      Sequel::Model [primary_schema, table].join('__').to_sym
     end
 
-    def qualify_table table, separator: "."
-      [ primary_schema, table].join(separator)
+    def qualify_table(table, separator: '.')
+      [primary_schema, table].join(separator)
     end
 
     def restore_search_path
       db.search_path = schemata.search_path
     end
 
-    def model_for_table table
-      Sequel::Model [ primary_schema, table ].join("__").to_sym
+    def model_for_table(table)
+      Sequel::Model [primary_schema, table].join('__').to_sym
     end
   end
 
-  def qualify_table table, separator: "."
-    [ primary_schema, table].join(separator)
+  def qualify_table(table, separator: '.')
+    [primary_schema, table].join(separator)
   end
 
   def restore_search_path
-    db.search_path = self.search_path
+    db.search_path = search_path
   end
 
   protected

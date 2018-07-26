@@ -6,13 +6,13 @@ require 'socket'
 
 AuthnLocal = Struct.new(:socket, :queue_length, :timeout) do
   class << self
-    def run socket:, queue_length:, timeout:
+    def run(socket:, queue_length:, timeout:)
       socket ||= '/run/authn-local/.socket'
       socket_dir = File.dirname(socket)
 
       unless File.directory?(socket_dir)
-        $stderr.puts "authn-local requires directory #{socket_dir.inspect} to exist and be a directory"
-        $stderr.puts "authn-local will not be enabled"
+        warn "authn-local requires directory #{socket_dir.inspect} to exist and be a directory"
+        warn 'authn-local will not be enabled'
         return
       end
 
@@ -35,7 +35,7 @@ AuthnLocal = Struct.new(:socket, :queue_length, :timeout) do
       # remove the socket on exit
       # alternatively it can be removed on startup
       # (or both)
-      $stderr.puts "Removing socket #{socket}"
+      warn "Removing socket #{socket}"
       File.unlink socket
     end
 
@@ -49,26 +49,26 @@ AuthnLocal = Struct.new(:socket, :queue_length, :timeout) do
           claims = conn.gets.strip
           begin
             conn.puts issue_token(claims)
-          rescue
-            $stderr.puts "Error in authn-local: #{$!.to_s}"
+          rescue StandardError
+            warn "Error in authn-local: #{$ERROR_INFO}"
             conn.puts
           ensure
             conn.close
           end
         end
       rescue Timeout::Error
-        $stderr.puts "Timeout::Error in authn-local"
+        warn 'Timeout::Error in authn-local'
       end
     end
   end
 
-  def issue_token claims
+  def issue_token(claims)
     claims = JSON.parse(claims)
-    claims = claims.slice("account", "sub", "exp", "cidr")
-    account = claims.delete("account") or raise "'account' is required"
+    claims = claims.slice('account', 'sub', 'exp', 'cidr')
+    (account = claims.delete('account')) || raise("'account' is required")
     raise "'sub' is required" unless claims['sub']
     key = Slosilo["authn:#{account}"]
-    if key 
+    if key
       key.issue_jwt(claims).to_json
     else
       raise "No signing key found for account #{account.inspect}"

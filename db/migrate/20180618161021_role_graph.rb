@@ -2,7 +2,7 @@
 
 Sequel.migration do
   up do
-    execute %Q{
+    execute %{
       CREATE TYPE role_graph_edge AS (
         parent text,
         child text
@@ -14,7 +14,7 @@ Sequel.migration do
       CALLED ON NULL INPUT
       AS $$
 
-        WITH RECURSIVE 
+        WITH RECURSIVE
         -- Ancestor tree
         up AS (
           (SELECT role_id, member_id FROM role_memberships LIMIT 0)
@@ -64,7 +64,7 @@ Sequel.migration do
   end
 
   down do
-    execute %Q{
+    execute %{
       DROP FUNCTION role_graph(start_role text);
       DROP TYPE role_graph_edge;
     }

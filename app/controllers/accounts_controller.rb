@@ -5,7 +5,7 @@ class AccountsController < ApplicationController
 
   def index
     authorize :read
-    
+
     render json: Account.list
   end
 

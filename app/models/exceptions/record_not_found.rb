@@ -4,7 +4,7 @@ module Exceptions
   class RecordNotFound < RuntimeError
     attr_reader :id, :account, :kind, :identifier
 
-    def initialize id, message: nil
+    def initialize(id, message: nil)
       super message || self.class.build_message(id)
 
       @id = id
@@ -12,11 +12,11 @@ module Exceptions
     end
 
     class << self
-      def parse_id id
+      def parse_id(id)
         id.split(':', 3)
       end
 
-      def build_message id
+      def build_message(id)
         account, kind, id = parse_id(id)
         kind ||= 'unknown kind'
         account ||= 'unknown account'

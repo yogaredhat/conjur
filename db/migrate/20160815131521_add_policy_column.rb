@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Sequel.migration do
-  TABLES = %w(roles resources role_memberships permissions annotations)
+  TABLES = %w[roles resources role_memberships permissions annotations].freeze
 
   up do
     TABLES.each do |table|
@@ -18,7 +18,7 @@ Sequel.migration do
 
   down do
     TABLES.each do |table|
-      execute %Q(ALTER TABLE #{table} DROP CONSTRAINT verify_policy_kind)
+      execute %(ALTER TABLE #{table} DROP CONSTRAINT verify_policy_kind)
       alter_table table.to_sym do
         drop_column :policy_id
       end

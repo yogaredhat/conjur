@@ -6,9 +6,7 @@ require 'net/ldap'
 
 module Authentication
   module AuthnLdap
-
     class Authenticator
-
       def initialize(env:,
                      ldap_server_factory: ::Authentication::AuthnLdap::Server)
         @env = env
@@ -22,7 +20,8 @@ module Authentication
       end
 
       def valid?(input)
-        login, password = input.username, input.password
+        login = input.username
+        password = input.password
         # Prevent LDAP injection attack
         safe_login = Net::LDAP::Filter.escape(login)
         return false if blacklisted_ldap_user?(safe_login)
@@ -39,6 +38,5 @@ module Authentication
         login == 'admin'
       end
     end
-
   end
 end

@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 class AuthenticateController < ApplicationController
+  AUTHN_RESOURCE_PREFIX = 'conjur/authn-'.freeze
 
-  AUTHN_RESOURCE_PREFIX = "conjur/authn-"
-
-  def index 
+  def index
     authenticators = {
       # Installed authenticator plugins
       installed: installed_authenticators.keys.sort,
-    
+
       # Authenticator webservices created in policy
       configured: configured_authenticators.sort,
 
@@ -38,7 +37,7 @@ class AuthenticateController < ApplicationController
       )
     )
     render json: authentication_token
-  rescue => e
+  rescue StandardError => e
     logger.debug("Authentication Error: #{e.message}")
     e.backtrace.each do |line|
       logger.debug(line)
@@ -49,7 +48,7 @@ class AuthenticateController < ApplicationController
   def k8s_inject_client_cert
     ::Authentication::AuthnK8s::Authenticator.new(env: ENV).inject_client_cert(params, request)
     head :ok
-  rescue => e
+  rescue StandardError => e
     logger.debug("Authentication Error: #{e.message}")
     e.backtrace.each do |line|
       logger.debug(line)
@@ -69,15 +68,15 @@ class AuthenticateController < ApplicationController
 
     Resource
       .where(
-        identifier.like("#{AUTHN_RESOURCE_PREFIX}%"), 
-        kind => "webservice"
+        identifier.like("#{AUTHN_RESOURCE_PREFIX}%"),
+        kind => 'webservice'
       )
       .select_map(identifier)
-      .map { |id| id.sub /^conjur\//, "" }
+      .map { |id| id.sub /^conjur\//, '' }
       .push(::Authentication::Strategy.default_authenticator_name)
   end
 
   def enabled_authenticators
-    (ENV["CONJUR_AUTHENTICATORS"] || ::Authentication::Strategy.default_authenticator_name).split(",")
+    (ENV['CONJUR_AUTHENTICATORS'] || ::Authentication::Strategy.default_authenticator_name).split(',')
   end
 end

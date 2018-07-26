@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Loads a policy into the database, by operating on a PolicyVersion which has already been created with the policy id, 
+# Loads a policy into the database, by operating on a PolicyVersion which has already been created with the policy id,
 # policy text, the authenticated user, and the policy owner. The PolicyVersion also parses the policy
 # and checks it for syntax errors, before this code is invoked.
 #
 # The algorithm works by loading the policy into a new, temporary schema (schemas are lightweight namespaces
-# in Postgres). Then this "new" policy (in the temporary schema) is merged into the "old" policy (in the 
+# in Postgres). Then this "new" policy (in the temporary schema) is merged into the "old" policy (in the
 # primary schema). The merge algorithm proceeds in distinct phases:
 #
 # 1) Records which exist in the "old" policy but not in the "new" policy are deleted from the "old" policy.
@@ -35,7 +35,7 @@
 # All steps occur within a transaction, so that if any errors occur (e.g. a role or permission grant which references
 # a non-existent role or resource), the entire operation is rolled back.
 #
-# Future: Note that it is also possible to skip step (1) (deletion of records from the "old" policy which are not defined in the 
+# Future: Note that it is also possible to skip step (1) (deletion of records from the "old" policy which are not defined in the
 # "new"). This "safe" mode can be operationally important, because the presence of cascading foreign key constraints in the schema
 # means that many records can potentially be deleted as a consequence of deleting an important "root"-ish record. For
 # example, deleting the "admin" role will most likely cascade to delete all records in the database.
@@ -50,18 +50,18 @@ module Loader
 
     attr_reader :policy_version, :create_records, :delete_records, :new_roles, :schemata
 
-    TABLES = %i(roles role_memberships resources permissions annotations)
+    TABLES = %i[roles role_memberships resources permissions annotations].freeze
 
     # Columns to compare across schemata to find exact duplicates.
     TABLE_EQUIVALENCE_COLUMNS = {
-      roles: [ :role_id ],
-      resources: [ :resource_id, :owner_id ],
-      role_memberships: [ :role_id, :member_id, :admin_option, :ownership ],
-      permissions: [ :resource_id, :privilege, :role_id ],
-      annotations: [ :resource_id, :name, :value ]
-    }
+      roles: [:role_id],
+      resources: %i[resource_id owner_id],
+      role_memberships: %i[role_id member_id admin_option ownership],
+      permissions: %i[resource_id privilege role_id],
+      annotations: %i[resource_id name value]
+    }.freeze
 
-    def initialize policy_version
+    def initialize(policy_version)
       @policy_version = policy_version
       @schemata = Schemata.new
 
@@ -73,7 +73,7 @@ module Loader
         Loader::Types.wrap policy_object, self
       end
     end
-    
+
     # Gets the id of the policy being loaded.
     def policy_id
       policy_version.policy.id
@@ -86,17 +86,13 @@ module Loader
 
       load_records
 
-      if policy_version.perform_automatic_deletion?
-        delete_removed
-      end
+      delete_removed if policy_version.perform_automatic_deletion?
 
       eliminate_shadowed
 
       eliminate_duplicates_exact
 
-      if policy_version.update_permitted?
-        update_changed
-      end
+      update_changed if policy_version.update_permitted?
 
       eliminate_duplicates_pk
 
@@ -117,21 +113,21 @@ module Loader
       policy_version.policy_log.lazy.map(&:to_audit_event).each { |event| event.log_to Audit.logger }
     end
 
-    def table_data schema = ""
+    def table_data(schema = '')
       self.class.table_data policy_version.policy.account, schema
     end
 
     def print_debug
-      puts "Temporary schema:"
+      puts 'Temporary schema:'
       puts table_data
       puts
-      puts "Master schema:"
+      puts 'Master schema:'
       puts table_data "#{primary_schema}__"
     end
 
     class << self
       # Dump the table data to a pretty table-formatted string. Useful for debugging and inspection.
-      def table_data account, schema = ""
+      def table_data(account, schema = '')
         require 'table_print'
         io = StringIO.new
         tp.set :io, io
@@ -141,8 +137,8 @@ module Loader
             model = Sequel::Model("#{schema}#{table}".to_sym)
             account_column = TABLE_EQUIVALENCE_COLUMNS[table].include?(:resource_id) ? :resource_id : :role_id
             io.write "#{table}\n"
-            sort_columns = TABLE_EQUIVALENCE_COLUMNS[table] + [ :policy_id ]
-            tp *([ model.where("account(#{account_column})".lit => account).order(sort_columns).all ] + TABLE_EQUIVALENCE_COLUMNS[table] + [ :policy_id ])
+            sort_columns = TABLE_EQUIVALENCE_COLUMNS[table] + [:policy_id]
+            tp *([model.where("account(#{account_column})".lit => account).order(sort_columns).all] + TABLE_EQUIVALENCE_COLUMNS[table] + [:policy_id])
             io.write "\n"
           end
         ensure
@@ -160,9 +156,9 @@ module Loader
     # existing policy and the new policy.
     def delete_removed
       TABLES.each do |table|
-        columns = Array(model_for_table(table).primary_key) + [ :policy_id ]
+        columns = Array(model_for_table(table).primary_key) + [:policy_id]
 
-        def comparisons table, columns, existing_alias, new_alias
+        def comparisons(table, columns, existing_alias, new_alias)
           columns.map do |column|
             "#{existing_alias}#{table}.#{column} = #{new_alias}#{table}.#{column}"
           end.join(' AND ')
@@ -202,19 +198,19 @@ module Loader
     # Delete rows from the new policy which are identical to existing rows.
     def eliminate_duplicates_exact
       TABLE_EQUIVALENCE_COLUMNS.each do |table, columns|
-        eliminate_duplicates table, columns + [ :policy_id ]
+        eliminate_duplicates table, columns + [:policy_id]
       end
     end
 
     # Delete rows from the new policy which have the same primary keys as existing rows.
     def eliminate_duplicates_pk
       TABLES.each do |table|
-        eliminate_duplicates table, Array(model_for_table(table).primary_key) + [ :policy_id ]
+        eliminate_duplicates table, Array(model_for_table(table).primary_key) + [:policy_id]
       end
     end
 
     # Eliminate duplicates from a table, using the specified comparison columns.
-    def eliminate_duplicates table, columns
+    def eliminate_duplicates(table, columns)
       comparisons = columns.map do |column|
         "new_#{table}.#{column} = old_#{table}.#{column}"
       end.join(' AND ')
@@ -234,11 +230,11 @@ module Loader
 
           update_statements = update_columns.map do |c|
             "#{c} = new_#{table}.#{c}"
-          end.join(", ")
+          end.join(', ')
 
-          join_columns = (pk_columns + [ :policy_id ]).map do |c|
+          join_columns = (pk_columns + [:policy_id]).map do |c|
             "#{table}.#{c} = new_#{table}.#{c}"
-          end.join(" AND ")
+          end.join(' AND ')
 
           db.execute <<-UPDATE
             UPDATE #{table}
@@ -256,7 +252,7 @@ module Loader
 
       in_primary_schema do
         TABLES.each do |table|
-          columns = (TABLE_EQUIVALENCE_COLUMNS[table] + [ :policy_id ]).join(", ")
+          columns = (TABLE_EQUIVALENCE_COLUMNS[table] + [:policy_id]).join(', ')
           db.execute "INSERT INTO #{table} ( #{columns} ) SELECT #{columns} FROM #{schema_name}.#{table}"
         end
       end
@@ -276,9 +272,9 @@ module Loader
 
     # Loads the records into the temporary schema (since the schema search path contains only the temporary schema).
     #
-    #  
+    #
     def load_records
-      raise "Policy version must be saved before loading" unless policy_version.resource_id
+      raise 'Policy version must be saved before loading' unless policy_version.resource_id
 
       create_records.map(&:create!)
 
@@ -289,7 +285,7 @@ module Loader
       end
     end
 
-    def in_primary_schema &block
+    def in_primary_schema
       restore_search_path
 
       yield
@@ -317,15 +313,15 @@ module Loader
       CREATE OR REPLACE FUNCTION account(id text) RETURNS text
       LANGUAGE sql IMMUTABLE
       AS $$
-      SELECT CASE 
-        WHEN split_part($1, ':', 1) = '' THEN NULL 
+      SELECT CASE
+        WHEN split_part($1, ':', 1) = '' THEN NULL
         ELSE split_part($1, ':', 1)
       END
       $$;
       SQL_STATEMENT
 
-      db.execute "ALTER TABLE resources ADD PRIMARY KEY ( resource_id )"
-      db.execute "ALTER TABLE roles ADD PRIMARY KEY ( role_id )"
+      db.execute 'ALTER TABLE resources ADD PRIMARY KEY ( resource_id )'
+      db.execute 'ALTER TABLE roles ADD PRIMARY KEY ( role_id )'
 
       db.execute "ALTER TABLE role_memberships ALTER COLUMN admin_option SET DEFAULT 'f'"
     end

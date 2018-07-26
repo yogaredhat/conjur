@@ -8,8 +8,8 @@ module Audit
       severity { success ? Syslog::LOG_NOTICE : Syslog::LOG_WARNING }
       facility Syslog::LOG_AUTH
       message_id 'update'
-      success_message { format "%s updated %s", user.id, resource.id }
-      failure_message { format "%s tried to update %s", user.id, resource.id }
+      success_message { format '%s updated %s', user.id, resource.id }
+      failure_message { format '%s tried to update %s', user.id, resource.id }
 
       def structured_data
         super.deep_merge \

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 describe FindResource do
-  context "when resource cannot be found" do
+  context 'when resource cannot be found' do
     let(:resource) { nil }
     describe '#resource' do
-      it "raises an error" do
+      it 'raises an error' do
         expect { controller.send :resource }
           .to raise_error Exceptions::RecordNotFound
       end

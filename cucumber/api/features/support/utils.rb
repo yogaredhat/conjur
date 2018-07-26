@@ -8,7 +8,7 @@ module Utils
     # Note the server will automatically shutdown when the test run is finished.
     # Also note that since this is a ruby thread it will sleep when GIL is taken.
     # This means it might be inconvenient to use eg. when interactively debugging.
-    def start_local_server addr = 'localhost'
+    def start_local_server(addr = 'localhost')
       port = find_ephemeral_port addr
       Thread.new do
         Rack::Server.start \
@@ -21,7 +21,7 @@ module Utils
 
     attr_reader :local_conjur_server
 
-    def find_ephemeral_port addr = 'localhost'
+    def find_ephemeral_port(addr = 'localhost')
       TCPServer.open(addr, 0) { |server| server.addr[1] }
     end
   end

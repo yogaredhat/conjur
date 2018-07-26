@@ -6,7 +6,7 @@ module TokenUser
   def token_user?
     Conjur::Rack.identity?
   end
-  
+
   def token_user
     Conjur::Rack.user
   end

@@ -2,7 +2,7 @@
 
 # Stores a policy which has been applied to the database, along with metadata such as the role
 # which submitted the policy.
-# 
+#
 # A PolicyVersion is constructed on an existing 'policy' resource. PolicyVersion records are automatically
 # assigned an incrementing +version+ number, just like Secrets.
 #
@@ -13,12 +13,12 @@
 # * +policy_text+ the text of the policy itself.
 # * +policy_sha256+ the SHA-256 of the policy in hex digest form.
 #
-# The policy text is parsed when the PolicyVersion is validated. Parse errors are placed onto the 
+# The policy text is parsed when the PolicyVersion is validated. Parse errors are placed onto the
 # +#errors+ field, along with any other validation errors. The parsed policy is available through the
 # +#records+ field.
 #
 # Except when loading the root policy, the policy statements that are submitted by the authenticated role
-# are enclosed within a +!policy+ statement, so that all the statements in the policy are scoped by the enclosing id. 
+# are enclosed within a +!policy+ statement, so that all the statements in the policy are scoped by the enclosing id.
 # For example, suppose a PolicyVersion is being loaded for the policy +prod/myapp+. If policy being loaded
 # contains a statement like +!layer+, then the layer id as loaded will be +prod/myapp+.
 class PolicyVersion < Sequel::Model(:policy_versions)
@@ -28,7 +28,7 @@ class PolicyVersion < Sequel::Model(:policy_versions)
   # The authenticated user who performs the policy load.
   many_to_one :role
 
-  one_to_many :policy_log, key: %i(policy_id version)
+  one_to_many :policy_log, key: %i[policy_id version]
 
   attr_accessor :parse_error, :policy_filename, :perform_automatic_deletion, :delete_permitted, :update_permitted
 
@@ -43,20 +43,20 @@ class PolicyVersion < Sequel::Model(:policy_versions)
     end
   end
 
-  def as_json options = {}
+  def as_json(options = {})
     super(options).tap do |response|
-      response["id"] = response.delete("resource_id")
-      %w(role).each do |field|
+      response['id'] = response.delete('resource_id')
+      %w[role].each do |field|
         write_id_to_json response, field
       end
     end
   end
 
   def root_policy?
-    policy.kind == "policy" && policy.identifier == "root"
+    policy.kind == 'policy' && policy.identifier == 'root'
   end
 
-  # Indicates whether records that exist in the database but not in the policy 
+  # Indicates whether records that exist in the database but not in the policy
   # update should be deleted.
   def perform_automatic_deletion?
     !!@perform_automatic_deletion
@@ -75,7 +75,7 @@ class PolicyVersion < Sequel::Model(:policy_versions)
   def validate
     super
 
-    validates_presence [ :policy, :current_user, :policy_text ]
+    validates_presence %i[policy current_user policy_text]
 
     return if errors.any?
 
@@ -86,7 +86,7 @@ class PolicyVersion < Sequel::Model(:policy_versions)
       errors.add(:policy_text, parse_error.to_s)
     else
       unless delete_records.empty? || delete_permitted?
-        errors.add(:policy_text, "may not contain deletion statements")
+        errors.add(:policy_text, 'may not contain deletion statements')
       end
     end
   end
@@ -97,7 +97,7 @@ class PolicyVersion < Sequel::Model(:policy_versions)
   end
 
   def before_update
-    raise Sequel::ValidationFailed, "Policy version cannot be updated once created"
+    raise Sequel::ValidationFailed, 'Policy version cannot be updated once created'
   end
 
   def policy_admin
@@ -105,15 +105,11 @@ class PolicyVersion < Sequel::Model(:policy_versions)
   end
 
   def create_records
-    records.select do |r|
-      !r.delete_statement?
-    end
+    records.reject(&:delete_statement?)
   end
 
   def delete_records
-    records.select do |r|
-      r.delete_statement?
-    end
+    records.select(&:delete_statement?)
   end
 
   protected
@@ -132,20 +128,20 @@ class PolicyVersion < Sequel::Model(:policy_versions)
       records = Conjur::PolicyParser::YAML::Loader.load(policy_text, policy_filename)
       records = wrap_in_policy records unless root_policy?
       @records = Conjur::PolicyParser::Resolver.resolve records, account, policy_admin.id
-    rescue
-      $stderr.puts $!.message
-      $stderr.puts $!.backtrace.join("  \n")
-      @parse_error = $!
+    rescue StandardError
+      warn $ERROR_INFO.message
+      warn $ERROR_INFO.backtrace.join("  \n")
+      @parse_error = $ERROR_INFO
     end
   end
 
   # Wraps the input records in a policy whose id is the +policy+ id, and whose owner is the
   # +policy_admin+.
-  def wrap_in_policy records
+  def wrap_in_policy(records)
     policy_record = Conjur::PolicyParser::Types::Policy.new policy.identifier
     policy_record.owner = Conjur::PolicyParser::Types::Role.new(policy_admin.id)
     policy_record.account = policy.account
     policy_record.body = records
-    [ policy_record ]
+    [policy_record]
   end
 end

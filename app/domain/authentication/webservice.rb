@@ -4,9 +4,7 @@
 # K8s tests.  We don't fully understand what causes the bug but this is the
 # hack we settled on to fix it.
 #
-if defined? Authentication::Webservice
-  return
-end
+return if defined? Authentication::Webservice
 
 require 'dry-struct'
 require 'types'
@@ -19,7 +17,7 @@ module Authentication
 
     def self.from_string(account, str)
       type, id = *str.split('/', 2)
-      self.new(account: account, authenticator_name: type, service_id: id)
+      new(account: account, authenticator_name: type, service_id: id)
     end
 
     def name

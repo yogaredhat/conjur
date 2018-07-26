@@ -11,12 +11,12 @@ Sequel.migration do
       # timestamp of when the policy has finished loading
       # if NULL, the policy load hasn't been finalized yet
       add_column :finished_at, :timestamptz,
-        index: true, # to quickly find the null
-        null: true # will be enforced by a trigger
+                 index: true, # to quickly find the null
+                 null: true # will be enforced by a trigger
       add_constraint(:created_before_finish) { created_at <= finished_at }
     end
 
-    execute """
+    execute ''"
       CREATE OR REPLACE FUNCTION policy_versions_finish()
         RETURNS trigger
       LANGUAGE plpgsql AS $$
@@ -29,7 +29,7 @@ Sequel.migration do
       $$;
 
       -- Deferred constraint trigger will run on transaction commit.
-      -- This enforces that loading policy version has to happen inside the 
+      -- This enforces that loading policy version has to happen inside the
       -- same transaction that created it, and that finished_at is never NULL
       -- once the transaction is committed.
       CREATE CONSTRAINT TRIGGER finish_current
@@ -54,16 +54,16 @@ Sequel.migration do
         SET search_path FROM CURRENT
         LANGUAGE sql STABLE AS $$
           SELECT * FROM policy_versions WHERE finished_at IS NULL $$;
-    """
+    "''
   end
 
   down do
-    execute """
+    execute ''"
       DROP FUNCTION current_policy_version();
       DROP TRIGGER finish_current ON policy_versions;
       DROP TRIGGER only_one_current ON policy_versions;
       DROP FUNCTION policy_versions_finish();
-    """
+    "''
 
     alter_table :policy_versions do
       drop_column :finished_at

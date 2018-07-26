@@ -6,25 +6,25 @@ class HostFactoryToken < Sequel::Model
   plugin :validation_helpers
 
   unrestrict_primary_key
-  
+
   attr_encrypted :token
   many_to_one :resource, reciprocal: :host_factory_tokens
 
   alias host_factory resource
-  
+
   class << self
     # Generates a random token.
     #
     # @return [String]
     def random_token
       require 'base32/crockford'
-      Slosilo::Random.salt.unpack("N*").map{|i| Base32::Crockford::encode(i)}.join.downcase
+      Slosilo::Random.salt.unpack('N*').map { |i| Base32::Crockford.encode(i) }.join.downcase
     end
 
     # Finds the HostFactoryToken whose token is +token+.
     #
     # @return [HostFactoryToken]
-    def from_token token
+    def from_token(token)
       require 'digest'
       where(token_sha256: Digest::SHA256.hexdigest(token)).all.find do |hft|
         hft.token == token
@@ -32,14 +32,14 @@ class HostFactoryToken < Sequel::Model
     end
   end
 
-  def as_json options = {}
-    super(options.merge(except: [ :token, :token_sha256, :cidr, :expiration, :resource_id ])).tap do |response|
+  def as_json(options = {})
+    super(options.merge(except: %i[token token_sha256 cidr expiration resource_id])).tap do |response|
       response[:expiration] = expiration.utc.iso8601
       response[:cidr] = cidr.map(&:to_s)
       response[:token] = token
     end
   end
-  
+
   def valid?
     !expired?
   end
@@ -48,7 +48,7 @@ class HostFactoryToken < Sequel::Model
     self[:cidr].map { |cidr| Util::CIDR.new(cidr) }
   end
 
-  def valid_origin? ip
+  def valid_origin?(ip)
     ip = IPAddr.new(ip)
     cidr.blank? || cidr.any? do |c|
       c.include?(ip)
@@ -56,26 +56,26 @@ class HostFactoryToken < Sequel::Model
   end
 
   def expired?
-    Time.now >= self.expiration
+    Time.now >= expiration
   end
-  
+
   def validate
     super
 
-    validates_presence [ :expiration]
+    validates_presence [:expiration]
   end
 
   def before_create
     super
-    
+
     generate_token
   end
-   
+
   private
 
   def generate_token
     require 'digest'
     self.token = self.class.random_token
-    self.token_sha256 = Digest::SHA256.hexdigest(self.token)
+    self.token_sha256 = Digest::SHA256.hexdigest(token)
   end
 end

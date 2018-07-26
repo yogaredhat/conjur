@@ -2,13 +2,12 @@
 
 module Authentication
   class InstalledAuthenticators
-
     def self.new(env, authentication_module: ::Authentication)
       ::Util::Submodules.of(authentication_module)
-        .flat_map { |mod| ::Util::Submodules.of(mod) }
-        .select { |cls| valid?(cls) }
-        .map { |cls| [url_for(cls), authenticator_instance(cls, env)] }
-        .to_h
+                        .flat_map { |mod| ::Util::Submodules.of(mod) }
+                        .select { |cls| valid?(cls) }
+                        .map { |cls| [url_for(cls), authenticator_instance(cls, env)] }
+                        .to_h
     end
 
     private
@@ -25,6 +24,5 @@ module Authentication
     def self.valid?(cls)
       ::Authentication::AuthenticatorClass::Validation.new(cls).valid?
     end
-
   end
 end

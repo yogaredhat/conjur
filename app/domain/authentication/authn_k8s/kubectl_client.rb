@@ -1,13 +1,13 @@
 module Authentication
   module AuthnK8s
     module KubectlClient
-      extend self
-      
-      KUBERNETES_SERVICEACCOUNT_DIR = '/var/run/secrets/kubernetes.io/serviceaccount'
+      module_function
 
-      def client api: "api", version: "v1"
-        raise "Kubernetes serviceaccount dir #{KUBERNETES_SERVICEACCOUNT_DIR} does not exist" unless File.exists?(KUBERNETES_SERVICEACCOUNT_DIR)
-        %w(KUBERNETES_SERVICE_HOST KUBERNETES_SERVICE_PORT).each do |var|
+      KUBERNETES_SERVICEACCOUNT_DIR = '/var/run/secrets/kubernetes.io/serviceaccount'.freeze
+
+      def client(api: 'api', version: 'v1')
+        raise "Kubernetes serviceaccount dir #{KUBERNETES_SERVICEACCOUNT_DIR} does not exist" unless File.exist?(KUBERNETES_SERVICEACCOUNT_DIR)
+        %w[KUBERNETES_SERVICE_HOST KUBERNETES_SERVICE_PORT].each do |var|
           raise "Expected environment variable #{var} is not set" unless ENV[var]
         end
 
@@ -24,7 +24,7 @@ module Authentication
             verify_ssl: OpenSSL::SSL::VERIFY_PEER
           }
         }
-        Kubeclient::Client.new [ url, api ].join('/'), version, ssl_args.merge(token_args)
+        Kubeclient::Client.new [url, api].join('/'), version, ssl_args.merge(token_args)
       end
     end
   end

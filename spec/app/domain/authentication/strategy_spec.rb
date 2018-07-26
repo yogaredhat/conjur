@@ -4,10 +4,10 @@ require 'spec_helper'
 
 RSpec.describe 'Authentication::Strategy::Input#to_access_request' do
   let (:two_authenticator_env) do
-    {'CONJUR_AUTHENTICATORS' => 'authn-one, authn-two'}
+    { 'CONJUR_AUTHENTICATORS' => 'authn-one, authn-two' }
   end
 
-  let (:blank_env) { Hash.new }
+  let (:blank_env) { {} }
 
   subject do
     Authentication::Strategy::Input.new(
@@ -20,8 +20,8 @@ RSpec.describe 'Authentication::Strategy::Input#to_access_request' do
     )
   end
 
-  context "An ENV lacking CONJUR_AUTHENTICATORS" do
-    it "whitelists only the default Conjur authenticator" do
+  context 'An ENV lacking CONJUR_AUTHENTICATORS' do
+    it 'whitelists only the default Conjur authenticator' do
       services = subject.to_access_request(blank_env).whitelisted_webservices
       expect(services.to_a.size).to eq(1)
       expect(services.first.name).to eq(
@@ -30,39 +30,39 @@ RSpec.describe 'Authentication::Strategy::Input#to_access_request' do
     end
   end
 
-  context "An ENV containing CONJUR_AUTHENTICATORS" do
-    it "whitelists exactly those authenticators as webservices" do
+  context 'An ENV containing CONJUR_AUTHENTICATORS' do
+    it 'whitelists exactly those authenticators as webservices' do
       services = subject
-        .to_access_request(two_authenticator_env)
-        .whitelisted_webservices
-        .map(&:name)
+                 .to_access_request(two_authenticator_env)
+                 .whitelisted_webservices
+                 .map(&:name)
       expect(services).to eq(['authn-one', 'authn-two'])
     end
   end
 
-  it "passes the username through as the user_id" do
+  it 'passes the username through as the user_id' do
     access_request = subject.to_access_request(blank_env)
     expect(access_request.user_id).to eq(subject.username)
   end
 
-  context "An input with a service_id" do
-    it "creates a Webservice with the correct authenticator_name" do
+  context 'An input with a service_id' do
+    it 'creates a Webservice with the correct authenticator_name' do
       webservice = subject.to_access_request(blank_env).webservice
       expect(webservice.authenticator_name).to eq(subject.authenticator_name)
     end
 
-    it "creates a Webservice with the correct service_id" do
+    it 'creates a Webservice with the correct service_id' do
       webservice = subject.to_access_request(blank_env).webservice
       expect(webservice.service_id).to eq(subject.service_id)
     end
 
-    it "creates a Webservice with the correct account" do
+    it 'creates a Webservice with the correct account' do
       webservice = subject.to_access_request(blank_env).webservice
       expect(webservice.account).to eq(subject.account)
     end
   end
 
-  context "An input without a service_id" do
+  context 'An input without a service_id' do
     subject do
       Authentication::Strategy::Input.new(
         authenticator_name: 'authn-test',
@@ -74,7 +74,7 @@ RSpec.describe 'Authentication::Strategy::Input#to_access_request' do
       )
     end
 
-    it "creates a Webservice without a service_id" do
+    it 'creates a Webservice without a service_id' do
       webservice = subject.to_access_request(blank_env).webservice
       expect(webservice.service_id).to be_nil
     end
@@ -138,10 +138,10 @@ RSpec.describe 'Authentication::Strategy' do
   ####################################
 
   let (:two_authenticator_env) do
-    {'CONJUR_AUTHENTICATORS' => 'authn-always-pass, authn-always-fail'}
+    { 'CONJUR_AUTHENTICATORS' => 'authn-always-pass, authn-always-fail' }
   end
 
-  let (:blank_env) { Hash.new }
+  let (:blank_env) { {} }
 
   ####################################
   # TokenFactory double
@@ -155,13 +155,12 @@ RSpec.describe 'Authentication::Strategy' do
     double('TokenFactory', signed_token: a_new_token)
   end
 
-#  ____  _   _  ____    ____  ____  ___  ____  ___ 
-# (_  _)( )_( )( ___)  (_  _)( ___)/ __)(_  _)/ __)
-#   )(   ) _ (  )__)     )(   )__) \__ \  )(  \__ \
-#  (__) (_) (_)(____)   (__) (____)(___/ (__) (___/
+  #  ____  _   _  ____    ____  ____  ___  ____  ___
+  # (_  _)( )_( )( ___)  (_  _)( ___)/ __)(_  _)/ __)
+  #   )(   ) _ (  )__)     )(   )__) \__ \  )(  \__ \
+  #  (__) (_) (_)(____)   (__) (____)(___/ (__) (___/
 
-
-  context "An unavailable authenticator" do
+  context 'An unavailable authenticator' do
     subject do
       Authentication::Strategy.new(
         authenticators: authenticators,
@@ -173,16 +172,16 @@ RSpec.describe 'Authentication::Strategy' do
       )
     end
 
-    it "raises AuthenticatorNotFound" do
+    it 'raises AuthenticatorNotFound' do
       input_ = input(authenticator_name: 'AUTHN-MISSING')
-      expect{ subject.conjur_token(input_) }.to raise_error(
+      expect { subject.conjur_token(input_) }.to raise_error(
         Authentication::Strategy::AuthenticatorNotFound
       )
     end
   end
 
-  context "An available authenticator" do
-    context "that passes Security checks" do
+  context 'An available authenticator' do
+    context 'that passes Security checks' do
       subject do
         Authentication::Strategy.new(
           authenticators: authenticators,
@@ -194,17 +193,17 @@ RSpec.describe 'Authentication::Strategy' do
         )
       end
 
-      context "and receives invalid credentials" do
-        it "raises InvalidCredentials" do
+      context 'and receives invalid credentials' do
+        it 'raises InvalidCredentials' do
           input_ = input(authenticator_name: 'authn-always-fail')
-          expect{ subject.conjur_token(input_) }.to raise_error(
+          expect { subject.conjur_token(input_) }.to raise_error(
             Authentication::Strategy::InvalidCredentials
           )
         end
       end
 
-      context "and receives valid credentials" do
-        it "returns a new token" do
+      context 'and receives valid credentials' do
+        it 'returns a new token' do
           allow(subject).to receive(:validate_origin) { true }
 
           input_ = input(authenticator_name: 'authn-always-pass')
@@ -213,7 +212,7 @@ RSpec.describe 'Authentication::Strategy' do
       end
     end
 
-    context "that fails Security checks" do
+    context 'that fails Security checks' do
       subject do
         Authentication::Strategy.new(
           authenticators: authenticators,
@@ -225,9 +224,9 @@ RSpec.describe 'Authentication::Strategy' do
         )
       end
 
-      it "raises an error" do
+      it 'raises an error' do
         input_ = input(authenticator_name: 'authn-always-pass')
-        expect{ subject.conjur_token(input_) }.to raise_error(
+        expect { subject.conjur_token(input_) }.to raise_error(
           /FAKE_SECURITY_ERROR/
         )
       end

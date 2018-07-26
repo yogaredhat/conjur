@@ -2,9 +2,7 @@
 
 Then(/^([\w_]+) "([^"]*)" is a role member( with admin option)?$/) do |role_kind, role_id, admin|
   members = @result['members']
-  if admin
-    members = members.select{|m| m.admin_option}
-  end
+  members = members.select(&:admin_option) if admin
   expect(members.map(&:member).map(&:id)).to include(make_full_id(role_kind, role_id))
 end
 

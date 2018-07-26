@@ -4,14 +4,12 @@
 #
 module Rotation
   class RotatorClass
-
     # Represents the rules any rotator class must conform to
     #
     class Validation
-
       RotateNotPresent = ::Util::ErrorClass.new(
-        "'{0}' is not a valid rotator, because it does not have " +
-        "a `:rotate` method."
+        "'{0}' is not a valid rotator, because it does not have " \
+        'a `:rotate` method.'
       )
 
       def initialize(cls)
@@ -39,7 +37,6 @@ module Rotation
       def name_aware
         @name_aware ||= ::Util::NameAwareModule.new(@cls)
       end
-
     end
 
     def initialize(cls)
@@ -65,6 +62,5 @@ module Rotation
     def name_aware
       @name_aware ||= ::Util::NameAwareModule.new(@cls)
     end
-
   end
 end

@@ -5,8 +5,8 @@ source 'https://rubygems.org'
 # make sure to use tls for github
 git_source(:github) { |name| "https://github.com/#{name}.git" }
 
-#ruby=ruby-2.5.1
-#ruby-gemset=conjur
+# ruby=ruby-2.5.1
+# ruby-gemset=conjur
 
 gem 'base58'
 gem 'iso8601'
@@ -33,11 +33,11 @@ gem 'slosilo', '~> 2.1'
 # Gem::InstallError: ruby_dep requires Ruby version >= 2.2.5, ~> 2.2.
 gem 'ruby_dep', '= 1.3.1'
 
- # Pinned to update for role member search, using ref so merging and removing the branch doesn't
- # immediately break this link
+# Pinned to update for role member search, using ref so merging and removing the branch doesn't
+# immediately break this link
 gem 'conjur-api', github: 'cyberark/conjur-api-ruby', branch: 'master'
 gem 'conjur-policy-parser', '>= 3.0.2',
-  github: 'conjurinc/conjur-policy-parser', branch: 'possum'
+    github: 'conjurinc/conjur-policy-parser', branch: 'possum'
 gem 'conjur-rack', '~> 3.1'
 gem 'conjur-rack-heartbeat'
 gem 'rack-rewrite'
@@ -50,7 +50,7 @@ gem 'simplecov', require: false
 gem 'sass-rails'
 gem 'therubyracer'
 gem 'uglifier'
-#gem 'coffee-rails'
+# gem 'coffee-rails'
 gem 'autoprefixer-rails'
 gem 'bootstrap-sass', '~> 3.2.0'
 gem 'dry-struct'

@@ -3,7 +3,7 @@
 require 'forwardable'
 
 module Util
-  # provides helper methods for interacting with CIDR network addresses 
+  # provides helper methods for interacting with CIDR network addresses
   class CIDR
     extend Forwardable
 
@@ -17,7 +17,7 @@ module Util
       ip_addr.is_a?(IPAddr) ? "#{ip_addr}/#{mask}" : ip_addr.to_s
     end
 
-    private 
+    private
 
     attr_reader :ip_addr
 

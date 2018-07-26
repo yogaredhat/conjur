@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-# This migration has been ported over from Conjur v3's /authz project. I had to 
+# This migration has been ported over from Conjur v3's /authz project. I had to
 # make a few changes for possum that have been documented with comments.
 Sequel.migration do
   up do
     create_table :resources_textsearch do
       Text :resource_id, primary_key: true
     end
-    
+
     run "ALTER TABLE ONLY resources_textsearch
         ADD CONSTRAINT resources_textsearch_resource_id_fkey
         FOREIGN KEY (resource_id) REFERENCES resources(resource_id)
         ON DELETE CASCADE;"
 
-    run "ALTER TABLE resources_textsearch ADD COLUMN textsearch tsvector;"
-    run "CREATE INDEX resources_ts_index ON resources_textsearch USING gist (textsearch);"
+    run 'ALTER TABLE resources_textsearch ADD COLUMN textsearch tsvector;'
+    run 'CREATE INDEX resources_ts_index ON resources_textsearch USING gist (textsearch);'
 
     run "CREATE FUNCTION tsvector(resource resources) RETURNS tsvector
         LANGUAGE sql
@@ -43,7 +43,7 @@ Sequel.migration do
         -- kind is C
         setweight(to_tsvector('pg_catalog.english', kind(resource.resource_id)), 'C')
         $$;"
-    
+
     run "CREATE FUNCTION resource_update_textsearch() RETURNS trigger
         -- The loader orchestration logic changes the search path temporarily, which causes
         -- these triggers to be unable to find the tables and functions they need. Fix this
@@ -107,16 +107,16 @@ Sequel.migration do
   end
 
   down do
-    run "DROP TRIGGER annotation_update_textsearch ON annotations;"
-    run "DROP FUNCTION annotation_update_textsearch();"
+    run 'DROP TRIGGER annotation_update_textsearch ON annotations;'
+    run 'DROP FUNCTION annotation_update_textsearch();'
 
-    run "DROP TRIGGER resource_update_textsearch ON resources;"
-    run "DROP FUNCTION resource_update_textsearch();"
+    run 'DROP TRIGGER resource_update_textsearch ON resources;'
+    run 'DROP FUNCTION resource_update_textsearch();'
 
-    run "DROP FUNCTION tsvector(resource resources);"
-    
-    run "DROP INDEX resources_ts_index;"
-    
+    run 'DROP FUNCTION tsvector(resource resources);'
+
+    run 'DROP INDEX resources_ts_index;'
+
     drop_table :resources_textsearch
   end
 end

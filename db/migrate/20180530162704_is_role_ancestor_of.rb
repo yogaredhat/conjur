@@ -2,7 +2,7 @@
 
 Sequel.migration do
   up do
-    execute %Q{
+    execute %{
       CREATE FUNCTION is_role_ancestor_of(role_id text, other_id text)
          RETURNS boolean
          LANGUAGE sql
@@ -21,6 +21,6 @@ Sequel.migration do
   end
 
   down do
-    execute %Q{DROP FUNCTION is_role_ancestor_of(text, text)}
+    execute %{DROP FUNCTION is_role_ancestor_of(text, text)}
   end
 end

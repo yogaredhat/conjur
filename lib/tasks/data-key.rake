@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 namespace :"data-key" do
-  desc "Create a data encryption key, which should be placed in the environment as CONJUR_DATA_KEY"
+  desc 'Create a data encryption key, which should be placed in the environment as CONJUR_DATA_KEY'
   task :generate do
     require 'slosilo'
     require 'base64'

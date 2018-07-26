@@ -5,7 +5,7 @@ module Authentication
     class ClientCertVerificationError < RuntimeError; end
     class ClientCertExpiredError < RuntimeError; end
     class NotFoundError < RuntimeError; end
-    
+
     class Authenticator
       def initialize(env:)
         @env = env
@@ -14,7 +14,7 @@ module Authentication
       def inject_client_cert(params, request)
         # TODO: replace this hack
         @v4_controller = :login
-        
+
         @params = params
         @request = request
 
@@ -28,10 +28,10 @@ module Authentication
         find_pod
         find_container
 
-        cert = @ca.issue pod_csr, [ "URI:#{spiffe_id}" ]
+        cert = @ca.issue pod_csr, ["URI:#{spiffe_id}"]
         install_signed_cert cert
       end
-      
+
       def valid?(input)
         # TODO: replace this hack
         @v4_controller = :authenticate
@@ -40,7 +40,7 @@ module Authentication
         @client_cert = input.password
         @service_id = input.service_id
         @host_id_param = input.username.split('/').last(3).join('/')
-        
+
         verify_enabled
         service_lookup
         host_lookup
@@ -48,10 +48,10 @@ module Authentication
         load_ca
         find_pod
         find_container
-        
+
         # Run through cert validations
         pod_certificate
-        
+
         true
       end
 
@@ -60,7 +60,7 @@ module Authentication
       ### TODO: The following section contains methods that were overridden in
       # two different controllers in the v4 implementation. This is a hacky way
       # of supporting both overrides in one class and should be replaced ASAP.
-      
+
       def host_id_param
         if @v4_controller == :login
           host_id_param_login
@@ -70,11 +70,11 @@ module Authentication
       end
 
       def host_id_param_login
-        if !@host_id_param
-          cn_entry = get_subject_hash(pod_csr)["CN"]
+        unless @host_id_param
+          cn_entry = get_subject_hash(pod_csr)['CN']
           raise CSRVerificationError, 'CSR must contain CN' unless cn_entry
-          
-          @host_id_param = cn_entry.gsub('.', '/')
+
+          @host_id_param = cn_entry.tr('.', '/')
         end
 
         @host_id_param
@@ -88,7 +88,7 @@ module Authentication
         if @v4_controller == :login
           spiffe_id_login
         elsif @v4_controller == :authenticate
-          spiffe_id_authenticate          
+          spiffe_id_authenticate
         end
       end
 
@@ -97,7 +97,7 @@ module Authentication
       end
 
       def spiffe_id_authenticate
-        @spiffe_id ||= cert_spiffe_id(pod_certificate)        
+        @spiffe_id ||= cert_spiffe_id(pod_certificate)
       end
 
       def pod_name
@@ -109,10 +109,10 @@ module Authentication
       end
 
       def pod_name_login
-        if !@pod_name
+        unless @pod_name
           raise CSRVerificationError, 'CSR must contain SPIFFE ID SAN' unless spiffe_id
 
-          _, _, namespace, _, @pod_name = URI.parse(spiffe_id).path.split("/")
+          _, _, namespace, _, @pod_name = URI.parse(spiffe_id).path.split('/')
           raise CSRVerificationError, 'CSR SPIFFE ID SAN namespace must match conjur host id namespace' unless namespace == k8s_namespace
         end
 
@@ -120,31 +120,31 @@ module Authentication
       end
 
       def pod_name_authenticate
-        if !@pod_name
+        unless @pod_name
           raise ClientCertVerificationError, 'Client certificate must contain SPIFFE ID SAN' unless spiffe_id
 
-          _, _, namespace, _, @pod_name = URI.parse(spiffe_id).path.split("/")
+          _, _, namespace, _, @pod_name = URI.parse(spiffe_id).path.split('/')
           raise ClientCertVerificationError, 'Client certificate SPIFFE ID SAN namespace must match conjur host id namespace' unless namespace == k8s_namespace
         end
 
         @pod_name
       end
-      
+
       #----------------------------------------
       # authn-k8s LoginController helpers
       #----------------------------------------
-      
-      def install_signed_cert cert
+
+      def install_signed_cert(cert)
         exec = KubectlExec.new @pod, container: k8s_container_name
-        response = exec.copy "/etc/conjur/ssl/client.pem", cert.to_pem, "0644"
-        
+        response = exec.copy '/etc/conjur/ssl/client.pem', cert.to_pem, '0644'
+
         if response[:error].present?
           raise AuthenticationError, response[:error].join
         end
       end
 
       def pod_csr
-        if !@pod_csr
+        unless @pod_csr
           @pod_csr = OpenSSL::X509::Request.new @request.body.read
           raise CSRVerificationError, 'CSR can not be verified' unless @pod_csr.verify @pod_csr.public_key
         end
@@ -157,7 +157,7 @@ module Authentication
       def csr_spiffe_id(csr)
         # https://stackoverflow.com/questions/46494429/how-to-get-an-attribute-from-opensslx509request
         attributes = csr.attributes
-        raise CSRVerificationError, "CSR must contain workload SPIFFE ID subjectAltName" if not attributes
+        raise CSRVerificationError, 'CSR must contain workload SPIFFE ID subjectAltName' unless attributes
 
         seq = nil
         values = nil
@@ -168,7 +168,7 @@ module Authentication
             break
           end
         end
-        raise CSRVerificationError, "CSR must contain workload SPIFFE ID subjectAltName" if not seq
+        raise CSRVerificationError, 'CSR must contain workload SPIFFE ID subjectAltName' unless seq
 
         seq.value.each do |v|
           v.each do |v|
@@ -179,7 +179,7 @@ module Authentication
             break if values
           end
         end
-        raise CSRVerificationError, "CSR must contain workload SPIFFE ID subjectAltName" if not values
+        raise CSRVerificationError, 'CSR must contain workload SPIFFE ID subjectAltName' unless values
 
         values = OpenSSL::ASN1.decode(values).value
 
@@ -189,7 +189,7 @@ module Authentication
                  raise CSRVerificationError, e.message
                end
 
-        raise CSRVerificationError, "CSR must contain exactly one URI SAN" unless (uris.count == 1)
+        raise CSRVerificationError, 'CSR must contain exactly one URI SAN' unless uris.count == 1
         uris[0]
       end
 
@@ -198,10 +198,10 @@ module Authentication
       #----------------------------------------
 
       def pod_certificate
-        #client_cert = request.env['HTTP_X_SSL_CLIENT_CERTIFICATE']
-        raise AuthenticationError, "No client certificate provided" unless @client_cert
+        # client_cert = request.env['HTTP_X_SSL_CLIENT_CERTIFICATE']
+        raise AuthenticationError, 'No client certificate provided' unless @client_cert
 
-        if !@pod_cert
+        unless @pod_cert
           begin
             @pod_cert ||= OpenSSL::X509::Certificate.new(@client_cert)
           rescue OpenSSL::X509::CertificateError
@@ -215,9 +215,9 @@ module Authentication
           # verify podname SAN matches calling pod ?
 
           # verify host_id matches CN
-          cn_entry = get_subject_hash(@pod_cert)["CN"]
+          cn_entry = get_subject_hash(@pod_cert)['CN']
 
-          if cn_entry.gsub('.', '/') != host_id_param
+          if cn_entry.tr('.', '/') != host_id_param
             raise ClientCertVerificationError, 'Client certificate CN must match host_id'
           end
 
@@ -233,8 +233,8 @@ module Authentication
       # ssl stuff
 
       def cert_spiffe_id(cert)
-        subject_alt_name = cert.extensions.find {|e| e.oid == "subjectAltName"}
-        raise ClientCertVerificationError, "Client Certificate must contain pod SPIFFE ID subjectAltName" if not subject_alt_name
+        subject_alt_name = cert.extensions.find { |e| e.oid == 'subjectAltName' }
+        raise ClientCertVerificationError, 'Client Certificate must contain pod SPIFFE ID subjectAltName' unless subject_alt_name
 
         # Parse the subject alternate name certificate extension as ASN1, first value should be the key
         asn_san = OpenSSL::ASN1.decode(subject_alt_name)
@@ -250,14 +250,14 @@ module Authentication
             raise ClientCertVerificationError, e.message
           end
 
-        raise ClientCertVerificationError, "Client Certificate must contain exactly one URI SAN" unless (uris.count == 1)
+        raise ClientCertVerificationError, 'Client Certificate must contain exactly one URI SAN' unless uris.count == 1
         uris[0]
       end
-      
+
       #----------------------------------------
       # authn-k8s ApplicationController helpers
       #----------------------------------------
-      
+
       def verify_enabled
         conjur_authenticators = (@env['CONJUR_AUTHENTICATORS'] || '').split(',').map(&:strip)
         unless conjur_authenticators.include?("authn-k8s/#{service_id}")
@@ -329,11 +329,11 @@ module Authentication
       end
 
       def namespace_scoped?
-        k8s_controller_name == "*" && k8s_object_name == "*"
+        k8s_controller_name == '*' && k8s_object_name == '*'
       end
 
       def permitted_scope?
-        ["pod", "service_account", "deployment", "stateful_set", "deployment_config"].include? k8s_controller_name
+        %w[pod service_account deployment stateful_set deployment_config].include? k8s_controller_name
       end
 
       def find_pod_under_controller
@@ -357,22 +357,18 @@ module Authentication
       end
 
       def authorize_host
-        unless host.role.allowed_to?("authenticate", @service)
+        unless host.role.allowed_to?('authenticate', @service)
           raise AuthenticationError, "#{host.role.id} does not have 'authenticate' privilege on #{@service.id}"
         end
       end
 
       def request_ip
         # In test & development, allow override of the request IP
-        ip = if %w(test development).member?(Rails.env)
-               params[:request_ip]
-             end
+        ip = (params[:request_ip] if %w[test development].member?(Rails.env))
         ip ||= Rack::Request.new(@request.env).ip
       end
 
-      def service_id
-        @service_id
-      end
+      attr_reader :service_id
 
       def service_lookup
         @service ||= Resource["#{@env['CONJUR_ACCOUNT']}:webservice:conjur/authn-k8s/#{service_id}"]
@@ -388,7 +384,7 @@ module Authentication
       end
 
       def host_id
-        [ host_id_prefix, host_id_param ].compact.join('/')
+        [host_id_prefix, host_id_param].compact.join('/')
       end
 
       def host_id_prefix
@@ -397,7 +393,7 @@ module Authentication
 
       def host_id_tokens
         host_id_param.split('/').tap do |tokens|
-          raise "Invalid host id; must end with k8s_namespace/k8s_controller_name/id" unless tokens.length >= 3
+          raise 'Invalid host id; must end with k8s_namespace/k8s_controller_name/id' unless tokens.length >= 3
         end
       end
 
@@ -415,7 +411,7 @@ module Authentication
           case v.tag
           # uniformResourceIdentifier in GeneralName (RFC5280)
           when 6
-            result << "#{v.value}"
+            result << v.value.to_s
           else
             raise StandardError, "Unknown tag in SAN, #{v.tag} -- Available: 2 (URI)\n"
           end

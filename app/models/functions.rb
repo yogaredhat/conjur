@@ -5,7 +5,7 @@ class Functions
     def ownership_trigger_sql
       <<-SQL_CODE
 
-      -- Deletes the role_memberships record with the indicated role and grantee (owner). The record may 
+      -- Deletes the role_memberships record with the indicated role and grantee (owner). The record may
       -- not exist, if the resource with the indicated owner does not have a corresponding role.
       CREATE OR REPLACE FUNCTION delete_role_membership_of_owner(role_id text, owner_id text) RETURNS int
       LANGUAGE plpgsql
@@ -105,7 +105,7 @@ class Functions
           next_version integer;
         BEGIN
           SELECT coalesce(max(version), 0) + 1 INTO next_version
-            FROM #{table} 
+            FROM #{table}
             WHERE resource_id = NEW.resource_id;
 
           NEW.version = next_version;

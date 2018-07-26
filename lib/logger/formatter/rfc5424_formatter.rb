@@ -11,11 +11,11 @@ require 'util/struct'
 
 class Logger
   class Formatter
-    # RFC5424-compliant log formatter. If given a message that responds to 
+    # RFC5424-compliant log formatter. If given a message that responds to
     # severity, facility, message_id and/or structured_data, it'll use them.
     class RFC5424Formatter
       # The :reek:LongParameterList here is to conform to Formatter interface.
-      def self.call severity, time, progname, msg
+      def self.call(severity, time, progname, msg)
         Format.new(severity: severity, time: time, progname: progname, msg: msg).to_s
       end
 
@@ -33,7 +33,7 @@ class Logger
 
         def to_s
           [header, timestamp, hostname, progname, Format.pid, msgid, sd, msg]
-            .map {|part| part || '-'}.join(" ") + "\n"
+            .map { |part| part || '-' }.join(' ') + "\n"
         end
 
         def header
@@ -64,7 +64,7 @@ class Logger
         def sd
           return unless (sdata = msg.try(:structured_data))
           sdata.map do |id, params|
-            format "[%s]", [id, *Format.sd_parameters(params)].join(" ")
+            format '[%s]', [id, *Format.sd_parameters(params)].join(' ')
           end.join
         end
 
@@ -73,7 +73,7 @@ class Logger
           Thread.current[:request_id] || Process.pid
         end
 
-        def self.sd_parameters params
+        def self.sd_parameters(params)
           params.map { |parameter, value| [parameter, value.to_s.inspect].join('=') }
         end
       end

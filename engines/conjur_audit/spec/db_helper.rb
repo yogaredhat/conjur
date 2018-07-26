@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_context "database setup" do
+shared_context 'database setup' do
   let(:db) { Sequel::Model.db }
 
   before { db[:messages].truncate }
@@ -13,7 +13,7 @@ shared_context "database setup" do
   end
 
   # :reek:UtilityFunction should be ok in tests
-  def add_message msg, props = {}
+  def add_message(msg, props = {})
     sdata = props[:sdata]
     ConjurAudit::Message.create({
       facility: 4,

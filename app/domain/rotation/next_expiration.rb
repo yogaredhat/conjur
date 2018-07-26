@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Rotation
-
   class NextExpiration
     def initialize(rotated_variable)
       @rotated_variable = rotated_variable
@@ -12,7 +11,7 @@ module Rotation
     end
 
     def after_error
-      time_from_now(2/5 * ttl_in_seconds)
+      time_from_now(2 / 5 * ttl_in_seconds)
     end
 
     private
@@ -26,5 +25,4 @@ module Rotation
       ISO8601::Duration.new(ttl).to_seconds
     end
   end
-
 end

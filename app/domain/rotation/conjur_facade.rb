@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Rotation
-
   # This class is the only API that the rotators are provided with.
   #
   # Any updates to the Conjur database occur through here.
@@ -11,7 +10,6 @@ module Rotation
   # of the `RotatedVariable` has changed.
   #
   class ConjurFacade
-
     attr_reader :rotated_variable
 
     def initialize(rotated_variable:,
@@ -49,7 +47,7 @@ module Rotation
         new_values.each do |resource_id, value|
           update_secret(resource_id, value)
         end
-        rotator_code.call if rotator_code
+        yield if rotator_code
       end
     end
 
@@ -76,5 +74,4 @@ module Rotation
       ::Rotation::NextExpiration.new(@rotated_variable)
     end
   end
-
 end

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Rotation
-
   # Represents that policy variable that contains the rotator and ttl
   # annotations
   #
@@ -48,5 +47,4 @@ module Rotation
       "#{prefix}/#{name}"
     end
   end
-
 end

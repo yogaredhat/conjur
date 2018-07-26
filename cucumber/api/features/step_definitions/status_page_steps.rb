@@ -6,6 +6,6 @@ end
 
 Then(/^the status page is reachable$/) do
   expect(@response.code).to eq(200)
-  expect(@response.headers[:content_type]).to include("text/html")
-  expect(@response.body).to include("is running!")
+  expect(@response.headers[:content_type]).to include('text/html')
+  expect(@response.body).to include('is running!')
 end

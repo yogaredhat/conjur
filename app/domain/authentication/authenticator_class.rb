@@ -4,24 +4,22 @@
 #
 module Authentication
   class AuthenticatorClass
-
     # Represents the rules any authenticator class must conform to
     #
     class Validation
-
       DoesntStartWithAuthn = ::Util::ErrorClass.new(
-        "'{0}' is not a valid authenticator parent module, because it does " +
+        "'{0}' is not a valid authenticator parent module, because it does " \
         "not begin with 'Authn'"
       )
 
       NotNamedAuthenticator = ::Util::ErrorClass.new(
-        "'{0}' is not a valid authenticator name.  The actual class " +
+        "'{0}' is not a valid authenticator name.  The actual class " \
         "implementing the authenticator must be named 'Authenticator'"
       )
 
       MissingValidMethod = ::Util::ErrorClass.new(
-        "'{0}' is not a valid authenticator, because it does not have " +
-        "a `:valid?(input)` method."
+        "'{0}' is not a valid authenticator, because it does not have " \
+        'a `:valid?(input)` method.'
       )
 
       def initialize(cls)
@@ -63,7 +61,6 @@ module Authentication
       def name_aware
         @name_aware ||= ::Util::NameAwareModule.new(@cls)
       end
-
     end
 
     attr_reader :authenticator
@@ -84,6 +81,5 @@ module Authentication
     def name_aware
       @name_aware ||= ::Util::NameAwareModule.new(@cls)
     end
-
   end
 end

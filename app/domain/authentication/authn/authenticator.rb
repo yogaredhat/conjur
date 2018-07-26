@@ -4,9 +4,7 @@
 #
 module Authentication
   module Authn
-
     class Authenticator < ::Dry::Struct
-
       def self.requires_env_arg?
         false
       end
@@ -14,7 +12,7 @@ module Authentication
       # optional
       #
       attribute :role_cls,
-        ::Types::Any.default{ ::Authentication::MemoizedRole }
+                ::Types::Any.default { ::Authentication::MemoizedRole }
       attribute :credentials_cls, ::Types::Any.default { ::Credentials }
 
       def valid?(input)
@@ -22,8 +20,6 @@ module Authentication
         credentials = credentials_cls[role_id]
         credentials.valid_api_key?(input.password)
       end
-
     end
-
   end
 end

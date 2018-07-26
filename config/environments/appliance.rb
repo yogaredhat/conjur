@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-load File.expand_path '../production.rb', __FILE__
+load File.expand_path 'production.rb', __dir__
 require 'rack/remember_uuid'
 
 Rails.application.configure do

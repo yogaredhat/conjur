@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe "routing for resources" do
-  it "routes GET /resources/:account to resources#index" do
+describe 'routing for resources' do
+  it 'routes GET /resources/:account to resources#index' do
     expect(get: '/resources/the-account/').to route_to(
       account: 'the-account',
       controller: 'resources',
@@ -11,7 +11,7 @@ describe "routing for resources" do
     )
   end
 
-  it "routes GET /resources/:account/:kind to resources#index" do
+  it 'routes GET /resources/:account/:kind to resources#index' do
     expect(get: '/resources/the-account/chunky').to route_to(
       account: 'the-account',
       controller: 'resources',
@@ -20,7 +20,7 @@ describe "routing for resources" do
     )
   end
 
-  it "routes GET /resources/:account/:kind/:identifier?check to resources#check_permission" do
+  it 'routes GET /resources/:account/:kind/:identifier?check to resources#check_permission' do
     expect(get: '/resources/the-account/foo/bar/baz?check').to route_to(
       account: 'the-account',
       controller: 'resources',
@@ -31,7 +31,7 @@ describe "routing for resources" do
     )
   end
 
-  it "routes GET /resources/:account/:kind/:identifier?permitted_roles to resources#permitted_roles" do
+  it 'routes GET /resources/:account/:kind/:identifier?permitted_roles to resources#permitted_roles' do
     expect(get: '/resources/the-account/foo/bar/baz?permitted_roles&privilege=fry').to route_to(
       account: 'the-account',
       controller: 'resources',
@@ -43,7 +43,7 @@ describe "routing for resources" do
     )
   end
 
-  it "routes GET /resources/:account/:kind/:resource to resources#show" do
+  it 'routes GET /resources/:account/:kind/:resource to resources#show' do
     expect(get: '/resources/the-account/foo/bar').to route_to(
       account: 'the-account',
       controller: 'resources',

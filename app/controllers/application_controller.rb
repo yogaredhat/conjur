@@ -40,24 +40,28 @@ class ApplicationController < ActionController::API
     end
   end
 
-  def record_not_found e
+  def record_not_found(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
     render_record_not_found e
   end
 
-  def no_matching_row e
+  def no_matching_row(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
-    target = e.dataset.model.table_name.to_s.underscore rescue nil
+    target = begin
+               e.dataset.model.table_name.to_s.underscore
+             rescue StandardError
+               nil
+             end
     render json: {
       error: {
-        code: "not_found",
+        code: 'not_found',
         target: target,
         message: e.message
       }.compact
     }, status: :not_found
   end
 
-  def foreign_key_constraint_violation e
+  def foreign_key_constraint_violation(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
 
     # check if this is a violation of role_memberships_member_id_fkey
@@ -69,19 +73,19 @@ class ApplicationController < ActionController::API
     # PG::ForeignKeyViolation: ERROR:  insert or update on table "role_memberships" violates foreign key constraint "role_memberships_role_id_fkey"
     # DETAIL:  Key (role_id)=(cucumber:group:developers) is not present in table "roles".
     if e.message.index(/role_memberships_member_id_fkey/) ||
-      e.message.index(/role_memberships_role_id_fkey/)
+       e.message.index(/role_memberships_role_id_fkey/)
 
       key_string = ''
-      e.message.split(" ").map do |text|
-        if text["(member_id)"] || text["(role_id)"]
-          key_string = text 
-          break 
-        end 
+      e.message.split(' ').map do |text|
+        if text['(member_id)'] || text['(role_id)']
+          key_string = text
+          break
+        end
       end
 
       # the member ID is inside the second set of parentheses of the key_string
       key_index = key_string.index(/\(/, 1) + 1
-      key = key_string[ key_index, key_string.length - key_index - 1 ]
+      key = key_string[key_index, key_string.length - key_index - 1]
 
       exc = Exceptions::RecordNotFound.new key, message: "Role #{key} does not exist"
       render_record_not_found exc
@@ -91,11 +95,11 @@ class ApplicationController < ActionController::API
     end
   end
 
-  def validation_failed e
+  def validation_failed(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
     message = e.errors.map do |field, messages|
       messages.map do |message|
-        [ field, message ].join(' ')
+        [field, message].join(' ')
       end
     end.flatten.join(',')
 
@@ -118,14 +122,14 @@ class ApplicationController < ActionController::API
     }, status: :unprocessable_entity
   end
 
-  def policy_invalid e
+  def policy_invalid(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
     render json: {
       error: {
-        code: "policy_invalid",
+        code: 'policy_invalid',
         message: e.message,
         innererror: {
-          code: "policy_invalid",
+          code: 'policy_invalid',
           filename: e.filename,
           line: e.mark.line,
           column: e.mark.column
@@ -134,7 +138,7 @@ class ApplicationController < ActionController::API
     }, status: :unprocessable_entity
   end
 
-  def argument_error  e
+  def argument_error(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
     render json: {
       error: {
@@ -144,28 +148,28 @@ class ApplicationController < ActionController::API
     }, status: :unprocessable_entity
   end
 
-  def record_exists e
+  def record_exists(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
     render json: {
       error: {
-        code: "conflict",
+        code: 'conflict',
         message: e.message,
         target: e.kind,
         details: {
-          code: "conflict",
-          target: "id",
+          code: 'conflict',
+          target: 'id',
           message: e.id
         }
       }
     }, status: :conflict
   end
 
-  def forbidden e
+  def forbidden(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
     head :forbidden
   end
 
-  def unauthorized e
+  def unauthorized(e)
     logger.debug "#{e}\n#{e.backtrace.join "\n"}"
     head :unauthorized
   end
@@ -175,22 +179,22 @@ class ApplicationController < ActionController::API
     @account ||= params[:account]
   end
 
-  def render_record_not_found e
+  def render_record_not_found(e)
     render json: {
       error: {
-        code: "not_found",
+        code: 'not_found',
         message: e.message,
         target: e.kind,
         details: {
-          code: "not_found",
-          target: "id",
+          code: 'not_found',
+          target: 'id',
           message: e.id
         }
       }
     }, status: :not_found
   end
 
-  def error_code_of_exception_class cls
+  def error_code_of_exception_class(cls)
     cls.to_s.underscore.split('/')[-1]
   end
 end

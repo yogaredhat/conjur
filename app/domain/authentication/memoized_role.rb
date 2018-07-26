@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Authentication
-
   class MemoizedRole
     def self.[](role_id)
       @user_roles ||= Hash.new { |h, id| h[id] = Role[id] }
@@ -12,5 +11,4 @@ module Authentication
       Role.roleid_from_username(account, username)
     end
   end
-
 end

@@ -3,13 +3,13 @@
 class ResourcesController < RestController
   include FindResource
   include AssumedRole
-  
+
   def index
     options = params.slice(:account, :kind, :limit, :offset, :search).symbolize_keys
-    
+
     if params[:owner]
       ownerid = Role.make_full_id(params[:owner], account)
-      options[:owner] = Role[ownerid] or raise Exceptions::RecordNotFound, ownerid
+      (options[:owner] = Role[ownerid]) || raise(Exceptions::RecordNotFound, ownerid)
     end
 
     # The v5 API currently sends +acting_as+ when listing resources
@@ -21,24 +21,24 @@ class ResourcesController < RestController
       if params[:count] == 'true'
         { count: scope.count('*'.lit) }
       else
-        scope.select(:resources.*).
-          eager(:annotations).
-          eager(:permissions).
-          eager(:secrets).
-          eager(:policy_versions).
-          all
+        scope.select(:resources.*)
+             .eager(:annotations)
+             .eager(:permissions)
+             .eager(:secrets)
+             .eager(:policy_versions)
+             .all
       end
-  
+
     render json: result
   end
-  
+
   def show
     render json: resource
   end
-  
+
   def permitted_roles
     privilege = params[:privilege] || params[:permission]
-    raise ArgumentError, "privilege" unless privilege
+    raise ArgumentError, 'privilege' unless privilege
     render json: Role.that_can(privilege, resource).map(&:id)
   end
 
@@ -47,7 +47,7 @@ class ResourcesController < RestController
   # +current_user+.
   def check_permission
     privilege = params[:privilege]
-    raise ArgumentError, "privilege" unless privilege
+    raise ArgumentError, 'privilege' unless privilege
 
     result = assumed_role.allowed_to?(privilege, resource)
 

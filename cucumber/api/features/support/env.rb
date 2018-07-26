@@ -14,4 +14,4 @@ require_relative 'utils'
 # per Rafal's request.  It could be deleted were it not for that.
 ENV['CONJUR_APPLIANCE_URL'] ||= Utils.start_local_server
 
-Slosilo["authn:cucumber"] ||= Slosilo::Key.new
+Slosilo['authn:cucumber'] ||= Slosilo::Key.new

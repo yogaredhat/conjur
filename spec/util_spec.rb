@@ -31,12 +31,12 @@ describe Util::Struct do
         field :param
         dyn { "param is #{param}" }
       end
-      expect(with_block.new(param: 42)).to have_attributes dyn: "param is 42"
+      expect(with_block.new(param: 42)).to have_attributes dyn: 'param is 42'
     end
 
     it "does not break inspection even when it's to_s" do
       struct = Class.new(Util::Struct) { abstract_field :to_s }
-      child = Class.new(struct) { to_s "hello world" }
+      child = Class.new(struct) { to_s 'hello world' }
       expect { child.new.inspect }.not_to raise_error
     end
   end

@@ -6,8 +6,8 @@ require 'uri'
 
 include GLI::App
 
-program_desc "Command and control application for Conjur"
-version File.read(File.expand_path("../VERSION", File.dirname(__FILE__)))
+program_desc 'Command and control application for Conjur'
+version File.read(File.expand_path('../VERSION', File.dirname(__FILE__)))
 arguments :strict
 subcommand_option_handling :normal
 
@@ -16,11 +16,11 @@ def connect
   require 'sequel'
 
   def test_select
-    fail "DATABASE_URL not set" unless ENV['DATABASE_URL']
+    raise 'DATABASE_URL not set' unless ENV['DATABASE_URL']
     begin
       db = Sequel::Model.db = Sequel.connect(ENV['DATABASE_URL'])
       db['select 1'].first
-    rescue
+    rescue StandardError
       false
     end
   end
@@ -31,7 +31,7 @@ def connect
     sleep 1
   end
 
-  raise "Database is still unavailable. Aborting!" unless test_select
+  raise 'Database is still unavailable. Aborting!' unless test_select
 
   true
 end
@@ -40,42 +40,42 @@ desc 'Run the application server'
 command :server do |c|
   c.desc 'Account to initialize'
   c.arg_name :name
-  c.flag [ :a, :account ]
+  c.flag %i[a account]
 
   c.desc 'Policy file to load into the server'
   c.arg_name :path
-  c.flag [ :f, :file ]
+  c.flag %i[f file]
 
   c.desc 'Server listen port'
   c.arg_name :port
   c.default_value ENV['PORT'] || '80'
-  c.flag [ :p, :port ]
+  c.flag %i[p port]
 
   c.desc 'Server bind address'
   c.default_value ENV['BIND_ADDRESS'] || '0.0.0.0'
   c.arg_name :ip
-  c.flag [ :b, :'bind-address' ]
+  c.flag %i[b bind-address]
 
-  c.action do |global_options,options,args|
+  c.action do |_global_options, options, _args|
     account = options[:account]
 
     connect
 
-    system "rake db:migrate" or exit $?.exitstatus
+    system('rake db:migrate') || exit($CHILD_STATUS.exitstatus)
     if account
-      system "rake account:create[#{account}]" or exit $?.exitstatus
+      system("rake account:create[#{account}]") || exit($CHILD_STATUS.exitstatus)
     end
 
     if file_name = options[:file]
-      raise "account option is required with file option" unless account
-      system "rake policy:load[#{account},#{file_name}]" or exit $?.exitstatus
+      raise 'account option is required with file option' unless account
+      system("rake policy:load[#{account},#{file_name}]") || exit($CHILD_STATUS.exitstatus)
     end
 
     Process.fork do
       exec "rails server -p #{options[:port]} -b #{options[:'bind-address']}"
     end
     Process.fork do
-      exec "rake authn_local:run"
+      exec 'rake authn_local:run'
     end
 
     # Start the rotation watcher on master
@@ -83,7 +83,7 @@ command :server do |c|
     is_master = !Sequel::Model.db['SELECT pg_is_in_recovery()'].first.values[0]
     if is_master
       Process.fork do
-        exec "rake expiration:watch"
+        exec 'rake expiration:watch'
       end
     end
 
@@ -103,19 +103,19 @@ command :server do |c|
   end
 end
 
-desc "Manage the policy"
+desc 'Manage the policy'
 command :policy do |cgrp|
-  cgrp.desc "Load MAML policy from file(s)"
+  cgrp.desc 'Load MAML policy from file(s)'
   cgrp.arg :account
   cgrp.arg :filename, :multiple
   cgrp.command :load do |c|
-    c.action do |global_options,options,args|
+    c.action do |_global_options, _options, args|
       account, *file_names = args
       connect
 
-      fail 'policy load failed' unless file_names.map { |file_name|
+      raise 'policy load failed' unless file_names.map do |file_name|
         system "rake policy:load[#{account},#{file_name}]"
-      }.all?
+      end.all?
     end
   end
 
@@ -136,7 +136,7 @@ $ conjurctl watch /run/conjur/policy/load)"
   cgrp.arg :account
   cgrp.arg :filename
   cgrp.command :watch do |c|
-    c.action do |global_options,options,args|
+    c.action do |_global_options, _options, args|
       account, file_name = args
       connect
 
@@ -145,9 +145,9 @@ $ conjurctl watch /run/conjur/policy/load)"
   end
 end
 
-desc "Manage the data encryption key"
+desc 'Manage the data encryption key'
 command :"data-key" do |cgrp|
-  cgrp.desc "Generate a data encryption key"
+  cgrp.desc 'Generate a data encryption key'
   cgrp.long_desc <<-DESC
 Use this command to generate a new Base64-encoded 256 bit data encrytion key.
 Once generated, this key should be placed into the environment of the Conjur
@@ -161,15 +161,15 @@ Example:
 $ export CONJUR_DATA_KEY="$(conjurctl data-key generate)"
   DESC
   cgrp.command :generate do |c|
-    c.action do |global_options,options,args|
-      exec "rake data-key:generate"
+    c.action do |_global_options, _options, _args|
+      exec 'rake data-key:generate'
     end
   end
 end
 
-desc "Manage accounts"
+desc 'Manage accounts'
 command :account do |cgrp|
-  cgrp.desc "Create an organization account"
+  cgrp.desc 'Create an organization account'
   cgrp.long_desc <<-DESC
 Use this command to generate and store a new account, along with its 2048-bit RSA private key,
 used to sign auth tokens, as well as the "admin" user API key.
@@ -183,7 +183,7 @@ $ conjurctl account create myorg
   DESC
   cgrp.arg :account
   cgrp.command :create do |c|
-    c.action do |global_options,options,args|
+    c.action do |_global_options, _options, args|
       account = args.first
       connect
 
@@ -191,10 +191,10 @@ $ conjurctl account create myorg
     end
   end
 
-  cgrp.desc "Delete an organization account"
+  cgrp.desc 'Delete an organization account'
   cgrp.arg :account
   cgrp.command :delete do |c|
-    c.action do |global_options,options,args|
+    c.action do |_global_options, _options, args|
       account = args.first
       connect
 
@@ -203,47 +203,47 @@ $ conjurctl account create myorg
   end
 end
 
-desc "Manage the database"
+desc 'Manage the database'
 command :db do |cgrp|
-  cgrp.desc "Create and/or upgrade the database schema"
+  cgrp.desc 'Create and/or upgrade the database schema'
   cgrp.command :migrate do |c|
-    c.action do |global_options,options,args|
+    c.action do |_global_options, _options, _args|
       connect
 
-      exec "rake db:migrate"
+      exec 'rake db:migrate'
     end
   end
 end
 
-desc "Manage roles"
+desc 'Manage roles'
 command :role do |cgrp|
   cgrp.desc "Retrieve a role's API key"
   cgrp.arg :role_id, :multiple
   cgrp.command :"retrieve-key" do |c|
-    c.action do |global_options,options,args|
+    c.action do |_global_options, _options, args|
       connect
 
-      fail 'key retrieval failed' unless args.map { |id|
+      raise 'key retrieval failed' unless args.map do |id|
         system "rake role:retrieve-key[#{id}]"
-      }.all?
+      end.all?
     end
   end
 end
 
-desc "Wait for the Conjur server to be ready"
+desc 'Wait for the Conjur server to be ready'
 command :wait do |c|
   c.desc 'Port'
   c.arg_name :port
   c.default_value ENV['PORT'] || '80'
-  c.flag [ :p, :port ], :must_match => /\d+/
+  c.flag %i[p port], must_match: /\d+/
 
   c.desc 'Number of retries'
   c.arg_name :retries
   c.default_value 90
-  c.flag [ :r, :retries ], :must_match => /\d+/
+  c.flag %i[r retries], must_match: /\d+/
 
-  c.action do |global_options,options,args|
-    puts "Waiting for Conjur to be ready..."
+  c.action do |_global_options, options, _args|
+    puts 'Waiting for Conjur to be ready...'
 
     retries = options[:retries].to_i
     port = options[:port]
@@ -253,21 +253,21 @@ command :wait do |c|
       begin
         response = Net::HTTP.get_response(uri)
         response.code.to_i < 300
-      rescue
+      rescue StandardError
         false
       end
     end
 
     retries.times do
       break if conjur_ready.call
-      STDOUT.print "."
+      STDOUT.print '.'
       sleep 1
     end
 
     if conjur_ready.call
-      puts " Conjur is ready!"
+      puts ' Conjur is ready!'
     else
-      exit_now! " Conjur is not ready after #{retries} seconds" 
+      exit_now! " Conjur is not ready after #{retries} seconds"
     end
   end
 end

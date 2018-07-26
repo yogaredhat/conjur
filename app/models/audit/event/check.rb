@@ -16,8 +16,8 @@ module Audit
       end
 
       def message
-        format "%s checked if %s can %s %s (%s)",
-          user.id, role_text, privilege, resource.id, success_text
+        format '%s checked if %s can %s %s (%s)',
+               user.id, role_text, privilege, resource.id, success_text
       end
 
       protected

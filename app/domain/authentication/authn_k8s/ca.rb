@@ -11,7 +11,7 @@ module Authentication
         end
 
         # Generate a CA key and certificate.
-        def generate subject
+        def generate(subject)
           key = generate_key
           public_key = key.public_key
 
@@ -28,20 +28,24 @@ module Authentication
           ef.subject_certificate = cert
           ef.issuer_certificate = cert
           cert.extensions = [
-            ef.create_extension("basicConstraints","CA:TRUE", true),
-            ef.create_extension("subjectKeyIdentifier", "hash"),
+            ef.create_extension('basicConstraints', 'CA:TRUE', true),
+            ef.create_extension('subjectKeyIdentifier', 'hash')
           ]
-          cert.add_extension ef.create_extension("authorityKeyIdentifier", "keyid:always,issuer:always")
+          cert.add_extension ef.create_extension('authorityKeyIdentifier', 'keyid:always,issuer:always')
 
           cert.sign key, OpenSSL::Digest::SHA1.new
 
-          [ cert, key ]
+          [cert, key]
         end
       end
 
-      def initialize certs, key
+      def initialize(certs, key)
         @bundle = certs
-        @cacert = @bundle.first rescue @bundle
+        @cacert = begin
+                    @bundle.first
+                  rescue StandardError
+                    @bundle
+                  end
         @cakey = key
       end
 
@@ -53,13 +57,13 @@ module Authentication
       # @param key [OpenSSL::PKey::RSA] key owned by the certificate holder, can
       # be just the public part. @see {.generate_key}
       # @return [OpenSSL::X509::Certificate]
-      def issue pod_csr, subject_altnames
+      def issue(pod_csr, subject_altnames)
         Certificate.new(@cacert, pod_csr, subject_altnames).tap do |cert|
           cert.sign @cakey, OpenSSL::Digest::SHA256.new
         end
       end
 
-      def verify cert
+      def verify(cert)
         cert.verify @cakey
       end
 
@@ -68,7 +72,7 @@ module Authentication
         attr_reader :cacert, :pod_csr
 
         # +lifespan+ default is 3 days
-        def initialize cacert, pod_csr, subject_altnames, lifespan: 3 * 24 * 60 * 60
+        def initialize(cacert, pod_csr, subject_altnames, lifespan: 3 * 24 * 60 * 60)
           super()
 
           @pod_csr = pod_csr
@@ -82,10 +86,10 @@ module Authentication
           self.not_after = not_before + lifespan
           self.public_key = pod_csr.public_key
 
-          create_extension "keyUsage", "digitalSignature,keyEncipherment", true
-          create_extension "subjectKeyIdentifier", "hash", false
+          create_extension 'keyUsage', 'digitalSignature,keyEncipherment', true
+          create_extension 'subjectKeyIdentifier', 'hash', false
           unless subject_altnames.empty?
-            create_extension "subjectAltName", subject_altnames.join(','), false
+            create_extension 'subjectAltName', subject_altnames.join(','), false
           end
         end
 
@@ -98,7 +102,7 @@ module Authentication
           end
         end
 
-        def create_extension *args
+        def create_extension(*args)
           add_extension ef.create_extension(*args)
         end
       end

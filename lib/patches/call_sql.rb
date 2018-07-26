@@ -3,16 +3,16 @@
 module CallSql
   module Sequel
     module Model
-      def call_sql *a
+      def call_sql(*a)
         db.select(::Sequel.function(*a)).first.values
       end
 
-      def select_from_function *a
+      def select_from_function(*a)
         from(::Sequel.function(*a))
       end
     end
   end
-  
+
   def self.insert
     ::Sequel::Model.send :extend, Sequel::Model
   end

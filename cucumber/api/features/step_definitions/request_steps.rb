@@ -2,7 +2,7 @@
 
 Given(/^I authorize the request with the host factory token$/) do
   expect(@host_factory_token).to be
-  headers[:authorization] = %Q(Token token="#{@host_factory_token.token}")
+  headers[:authorization] = %(Token token="#{@host_factory_token.token}")
 end
 
 When(/^I( (?:can|successfully))? GET "([^"]*)"$/) do |can, path|
@@ -24,8 +24,8 @@ When(/^I( (?:can|successfully))? DELETE "([^"]*)"$/) do |can, path|
 end
 
 When(/^I( (?:can|successfully))? GET "([^"]*)" with parameters:$/) do |can, path, parameters|
-  params = YAML.load(parameters)
-  path = [ path, params.to_query ].join("?")
+  params = YAML.safe_load(parameters)
+  path = [path, params.to_query].join('?')
   try_request can do
     get_json path
   end
@@ -77,7 +77,7 @@ When(/^I( (?:can|successfully))? PATCH "([^"]*)" with body:$/) do |can, path, bo
 end
 
 When(/^I( (?:can|successfully))? POST "([^"]*)" with parameters:$/) do |can, path, parameters|
-  params = YAML.load(parameters)
+  params = YAML.safe_load(parameters)
   try_request can do
     post_json path, params
   end
@@ -124,13 +124,13 @@ end
 Then(/^I (?:can )*authenticate with the admin API key for the account "(.*?)"/) do |account|
   user = lookup_user('admin', account)
   user.reload
-  steps %Q{
+  steps %(
     Then I can POST "/authn/#{account}/admin/authenticate" with plain text body "#{user.api_key}"
     And I can GET "/authn/#{account}/login" with username "admin" and password "#{user.api_key}"
-  }
+  )
 end
 
 Then(/^I save the response as "(.+)"$/) do |name|
-  @saved_results = @saved_results || {}
+  @saved_results ||= {}
   @saved_results[name] = @result
 end

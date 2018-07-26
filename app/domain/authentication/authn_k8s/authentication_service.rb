@@ -1,4 +1,4 @@
-# AuthenticationService represents the authenticator itself, which 
+# AuthenticationService represents the authenticator itself, which
 # has a Conjur id that:
 #
 # * Identifies a policy.
@@ -12,13 +12,13 @@ module Authentication
 
       # Constructs AuthenticationService from the +id+, which is typically something like
       # conjur/authn-k8s/<cluster-name>.
-      def initialize id
+      def initialize(id)
         @id = id
       end
 
-      # Generates a CA certificate and key and store them in Conjur variables.  
+      # Generates a CA certificate and key and store them in Conjur variables.
       def initialize_ca
-        subject = "/CN=#{id.gsub('/', '.')}/OU=Conjur Kubernetes CA/O=#{conjur_account}"
+        subject = "/CN=#{id.tr('/', '.')}/OU=Conjur Kubernetes CA/O=#{conjur_account}"
 
         cert, key = CA.generate subject
 
@@ -56,25 +56,25 @@ module Authentication
       end
 
       protected
-      
+
       # Gets an access token for the policy role.
       def policy_token
         @policy_token ||= Conjur::API.authenticate_local "policy/#{id}"
       end
 
       # Stores the CA cert and key in variables.
-      def populate_ca_variables cert, key
+      def populate_ca_variables(cert, key)
         Secret.create(resource_id: ca_cert_variable.id, value: cert.to_pem)
         Secret.create(resource_id: ca_key_variable.id, value: key.to_pem)
       end
 
       # In the case that this node is a follower, it's necessary to wait for the
       # variables to be replicated from the master.
-      def wait_for_variable var, value
-        while true
+      def wait_for_variable(var, value)
+        loop do
           begin
             break if var.value == value.to_pem
-          rescue
+          rescue StandardError
             logger.debug "Waiting for #{var} to replicate to me..."
             sleep 2
           end

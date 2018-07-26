@@ -6,14 +6,14 @@ require 'ostruct'
 module Util
   # An OpenStruct with explicitly defined initial fields.
   class Struct < OpenStruct
-    def initialize values = {}
+    def initialize(values = {})
       klass = self.class
       klass.check_args values
       super klass.defaults.merge values
     end
 
     class << self
-      def check_args values
+      def check_args(values)
         keys = values.keys
         if (extra = keys - fields - defaults.keys).any? # rubocop:disable Style/GuardClause
           raise ArgumentError, "unexpected parameters: #{extra.join(', ')}"
@@ -25,7 +25,7 @@ module Util
       # Declare required and optional fields.
       # Example usage:
       #   fields :required, optional: "default"
-      def field *reqfields, **optfields
+      def field(*reqfields, **optfields)
         defaults.merge! optfields
         fields.push(*reqfields)
       end
@@ -42,7 +42,7 @@ module Util
       #     time { Time.now }
       #   end
       # Note you can still use ordinary `def` in the subclass to define the field.
-      def abstract_field *fields
+      def abstract_field(*fields)
         fields.each(&method(:define_abstract_field))
       end
 
@@ -56,7 +56,7 @@ module Util
 
       private
 
-      def define_abstract_field field
+      def define_abstract_field(field)
         define_singleton_method(field) do |value = nil, &block|
           return super() unless value || block
           block = -> { value } if value

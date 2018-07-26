@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 namespace :role do
-  desc "Retrieve the API key for the given role"
-  task :"retrieve-key", [:role_id] => [:environment] do |t, args|
+  desc 'Retrieve the API key for the given role'
+  task :"retrieve-key", [:role_id] => [:environment] do |_t, args|
     begin
       role = Role.first!(role_id: args[:role_id])
       puts role.api_key
@@ -11,7 +11,7 @@ namespace :role do
       # stdout so that a script using conjurctl always gets one line of output
       # per role. If stdout is a TTY, skip printing the blank line so it's not
       # confusing for humans.
-      $stderr.puts "error: role does not exist: #{args[:role_id]}"
+      warn "error: role does not exist: #{args[:role_id]}"
       puts unless $stdout.isatty
       exit 1
     end

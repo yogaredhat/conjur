@@ -2,13 +2,15 @@
 
 class PublicKeysController < ApplicationController
   def show
-    account, kind, id = [ params[:account], params[:kind], params[:identifier] ]
+    account = params[:account]
+    kind = params[:kind]
+    id = params[:identifier]
 
     values = Secret.latest_public_keys account, kind, id
     # For test stability.
-    values.sort! if %w(test development).member?(Rails.env)
+    values.sort! if %w[test development].member?(Rails.env)
     result = values.map(&:strip).join("\n").strip + "\n"
 
-    render text: result, content_type: "text/plain"
+    render text: result, content_type: 'text/plain'
   end
 end

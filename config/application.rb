@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 
-
-require File.expand_path('../boot', __FILE__)
+require File.expand_path('boot', __dir__)
 
 # Pick the frameworks you want:
-#require "active_model/railtie"
-#require "active_job/railtie"
+# require "active_model/railtie"
+# require "active_job/railtie"
 # require "active_record/railtie"
-require "action_controller/railtie"
-#require "action_mailer/railtie"
-#require "action_view/railtie"
+require 'action_controller/railtie'
+# require "action_mailer/railtie"
+# require "action_view/railtie"
 # require "sprockets/railtie"
 # require "rails/test_unit/railtie"
 
@@ -18,7 +17,7 @@ require "action_controller/railtie"
 Bundler.require(*Rails.groups)
 
 # Workaround for debify not being able to use embedded gems.
-$LOAD_PATH.push File.expand_path "../../engines/conjur_audit/lib", __FILE__
+$LOAD_PATH.push File.expand_path '../engines/conjur_audit/lib', __dir__
 require 'conjur_audit'
 
 module Possum
@@ -41,7 +40,7 @@ module Possum
       Sequel.extension :core_extensions, :postgres_schemata
     end
 
-    config.encoding = "utf-8"
+    config.encoding = 'utf-8'
     config.active_support.escape_html_entities_in_json = true
 
     # Whether to dump the schema after successful migrations.
@@ -50,18 +49,18 @@ module Possum
 
     # Token authentication is optional for authn routes, and it's not applied at all to authentication.
     config.middleware.use Conjur::Rack::Authenticator,
-      optional: [
-        /^\/authn-[^\/]+\//,
-        /^\/authn\//,
-        /^\/public_keys\//
-      ],
-      except: [
-        /^\/authn-[^\/]+\/.*\/authenticate$/,
-        /^\/authn\/.*\/authenticate$/,
-        /^\/host_factories\/hosts$/,
-        /^\/assets\/.*/,
-        /^\/authenticators$/,
-        /^\/$/
-      ]
+                          optional: [
+                            /^\/authn-[^\/]+\//,
+                            /^\/authn\//,
+                            /^\/public_keys\//
+                          ],
+                          except: [
+                            /^\/authn-[^\/]+\/.*\/authenticate$/,
+                            /^\/authn\/.*\/authenticate$/,
+                            /^\/host_factories\/hosts$/,
+                            /^\/assets\/.*/,
+                            /^\/authenticators$/,
+                            /^\/$/
+                          ]
   end
 end

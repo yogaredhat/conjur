@@ -8,8 +8,8 @@ Sequel.migration do
 
       foreign_key :client_id, :roles, type: String, null: true, on_delete: :cascade
 
-      column :api_key, "bytea"
-      column :encrypted_hash, "bytea"
+      column :api_key, 'bytea'
+      column :encrypted_hash, 'bytea'
       Timestamp :expiration
     end
   end

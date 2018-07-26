@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class PolicyLog < Sequel::Model :policy_log
-  many_to_one :policy_version, key: %i(policy_id version)
+  many_to_one :policy_version, key: %i[policy_id version]
 
   def to_audit_event
     Audit::Event::Policy.new \

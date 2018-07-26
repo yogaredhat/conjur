@@ -2,16 +2,16 @@
 
 require 'spec_helper'
 
-describe Account, :type => :model do
-  let(:account_name) { "account-crud-rspec" }
+describe Account, type: :model do
+  let(:account_name) { 'account-crud-rspec' }
 
   def create_account
     Account.create account_name
   end
 
-  describe "account creation" do
-    describe "when the account does not exist" do
-      it "succeeds" do
+  describe 'account creation' do
+    describe 'when the account does not exist' do
+      it 'succeeds' do
         create_account
 
         expect(Slosilo["authn:#{account_name}"]).to be
@@ -21,59 +21,59 @@ describe Account, :type => :model do
       end
     end
 
-    describe "when the account exists" do
+    describe 'when the account exists' do
       before { create_account }
-      it "refuses" do
+      it 'refuses' do
         expect { Account.create account_name }.to raise_error(Exceptions::RecordExists)
       end
-      describe "and it refuses" do
+      describe 'and it refuses' do
         let!(:exception) do
           begin
             Account.create account_name
-          rescue
-            $!
+          rescue StandardError
+            $ERROR_INFO
           end
         end
-        describe("its kind") { specify { expect(exception.kind).to eq("account") } }
-        describe("its id")   { specify { expect(exception.id).to eq(account_name) } }
+        describe('its kind') { specify { expect(exception.kind).to eq('account') } }
+        describe('its id')   { specify { expect(exception.id).to eq(account_name) } }
       end
     end
   end
 
-  describe "account listing" do
-    before {
+  describe 'account listing' do
+    before do
       create_account
-    }
-    it "includes the new account" do
+    end
+    it 'includes the new account' do
       expect(Account.list).to include(account_name)
     end
 
-    it "does not include the special account !" do
-      expect(Account.list).to_not include("!")
+    it 'does not include the special account !' do
+      expect(Account.list).to_not include('!')
     end
   end
 
-  describe "account deletion" do
-    describe "when the account does not exist" do
-      it "is not found" do
+  describe 'account deletion' do
+    describe 'when the account does not exist' do
+      it 'is not found' do
         expect { Account.new(account_name).delete }.to raise_error(Sequel::NoMatchingRow)
       end
-      describe "and it refuses" do
+      describe 'and it refuses' do
         let!(:exception) do
           begin
             Account.new(account_name).delete
-          rescue
-            $!
+          rescue StandardError
+            $ERROR_INFO
           end
         end
-        describe("its kind") { specify { expect(exception.dataset.model.table_name).to eq(:slosilo_keystore) } }
+        describe('its kind') { specify { expect(exception.dataset.model.table_name).to eq(:slosilo_keystore) } }
       end
     end
 
-    describe "when the account exists" do
-      it "deletes it" do
+    describe 'when the account exists' do
+      it 'deletes it' do
         create_account
-        Account.new(account_name).delete 
+        Account.new(account_name).delete
 
         expect(Slosilo["authn:#{account_name}"]).to_not be
         expect(Role["#{account_name}:user:admin"]).to_not be

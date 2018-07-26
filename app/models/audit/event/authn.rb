@@ -16,13 +16,13 @@ module Audit
       end
 
       def success_message
-        format "%s successfully authenticated with authenticator %s%s",
-          role_id, authenticator_name, service_message_part
+        format '%s successfully authenticated with authenticator %s%s',
+               role_id, authenticator_name, service_message_part
       end
 
       def failure_message
-        format "%s failed to authenticate with authenticator %s%s",
-          role_id, authenticator_name, service_message_part
+        format '%s failed to authenticate with authenticator %s%s',
+               role_id, authenticator_name, service_message_part
       end
 
       protected

@@ -4,31 +4,26 @@
 # K8s tests.  We don't fully understand what causes the bug but this is the
 # hack we settled on to fix it.
 #
-if defined? Rotation::Rotators::Aws::SecretKey
-  return
-end
+return if defined? Rotation::Rotators::Aws::SecretKey
 
 require 'aws-sdk-iam'
 
 module Rotation
   module Rotators
     module Aws
-
       class SecretKey
-
         def initialize(iam_client: ::Aws::IAM::Client)
           @iam_client = iam_client
         end
 
         def rotate(facade)
-
           creds  = AwsCredentials.new(facade)
           client = @iam_client.new(creds.credentials)
 
           # Delete old keys on AWS
           key_metadata = client.list_access_keys.access_key_metadata
           key_metadata
-            .select { |x| x['access_key_id'] != creds.access_key_id }
+            .reject { |x| x['access_key_id'] == creds.access_key_id }
             .each { |x| client.delete_access_key(access_key_id: x['access_key_id']) }
 
           # New key on AWS
@@ -36,15 +31,14 @@ module Rotation
 
           # Update in conjur
           facade.update_variables(Hash[
-            creds.conjur_ids[:access_key_id]    , new_key.access_key_id,
+            creds.conjur_ids[:access_key_id], new_key.access_key_id,
             creds.conjur_ids[:secret_access_key], new_key.secret_access_key
           ])
         end
 
-        private 
+        private
 
         class AwsCredentials < ::Struct.new(:facade)
-
           def access_key_id
             credentials[:access_key_id]
           end
@@ -66,7 +60,7 @@ module Rotation
             return @credentials if @credentials
             keys = %i[region access_key_id secret_access_key]
             vals = facade.current_values(keys.map(&conjur_ids))
-            @credentials = keys.map { |k| [ k, vals[conjur_ids[k]] ] }.to_h
+            @credentials = keys.map { |k| [k, vals[conjur_ids[k]]] }.to_h
           end
 
           private
@@ -76,7 +70,6 @@ module Rotation
           end
         end
       end
-
     end
   end
 end

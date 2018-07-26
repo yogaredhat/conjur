@@ -12,10 +12,10 @@ describe PolicyVersion do
         policy_text: '[]'
 
       # force constraints run
-      PolicyVersion.db.execute """
+      PolicyVersion.db.execute ''"
         SET CONSTRAINTS ALL IMMEDIATE;
         SET CONSTRAINTS ALL DEFERRED;
-      """
+      "''
     end
 
     it 'returns nil if no policy load is in progress' do
@@ -31,7 +31,7 @@ describe PolicyVersion do
     end
   end
 
-  it "finalizes previously active policy version" do
+  it 'finalizes previously active policy version' do
     one = PolicyVersion.create \
       policy: policy('one'),
       role: owner,
@@ -45,8 +45,7 @@ describe PolicyVersion do
   end
 
   let(:owner) { Role.create role_id: 'spec:user:spec' }
-  def policy name
+  def policy(name)
     Resource.create resource_id: "spec:policy:#{name}", owner: owner
   end
 end
-

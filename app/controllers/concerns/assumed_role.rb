@@ -12,11 +12,9 @@ module AssumedRole
   extend ActiveSupport::Concern
 
   def assumed_role?
-    begin
-      assumed_role
-    rescue Forbidden
-      nil
-    end
+    assumed_role
+  rescue Forbidden
+    nil
   end
 
   def assumed_role(role_id = params[:role].presence)
@@ -34,5 +32,3 @@ module AssumedRole
     role
   end
 end
-
-    

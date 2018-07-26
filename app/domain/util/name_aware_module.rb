@@ -2,7 +2,6 @@
 
 module Util
   class NameAwareModule < SimpleDelegator
-
     def own_name
       name_parts.last
     end

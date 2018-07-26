@@ -6,8 +6,8 @@ Sequel.migration do
     CREATE OR REPLACE FUNCTION account(id text) RETURNS text
     LANGUAGE sql IMMUTABLE
     AS $$
-    SELECT CASE 
-       WHEN split_part($1, ':', 1) = '' THEN NULL 
+    SELECT CASE
+       WHEN split_part($1, ':', 1) = '' THEN NULL
       ELSE split_part($1, ':', 1)
     END
     $$;
@@ -15,8 +15,8 @@ Sequel.migration do
     CREATE OR REPLACE FUNCTION kind(id text) RETURNS text
     LANGUAGE sql IMMUTABLE
     AS $$
-    SELECT CASE 
-       WHEN split_part($1, ':', 2) = '' THEN NULL 
+    SELECT CASE
+       WHEN split_part($1, ':', 2) = '' THEN NULL
       ELSE split_part($1, ':', 2)
     END
     $$;
@@ -29,10 +29,10 @@ Sequel.migration do
     SQL
 
     # Create 'account', 'kind', and 'identifier' functions on roles and resources
-    # Index 'account' and 'kind' functions on the 'roles' and 'resources' tables 
+    # Index 'account' and 'kind' functions on the 'roles' and 'resources' tables
     # Index 'account,kind' on 'roles' and 'resources'
     # Require account, kind NOT NULL
-    %w(roles resources).each do |table|
+    %w[roles resources].each do |table|
       primary_key = Sequel::Model(table.to_sym).primary_key
 
       execute <<-SQL
@@ -43,7 +43,7 @@ Sequel.migration do
       $$;
       SQL
 
-      %w(account kind).each do |func|
+      %w[account kind].each do |func|
         execute <<-SQL
         CREATE OR REPLACE FUNCTION #{func}(record #{table}) RETURNS text
         LANGUAGE sql IMMUTABLE
@@ -59,11 +59,11 @@ Sequel.migration do
         ADD CONSTRAINT has_#{func} CHECK (#{func}(#{primary_key}) IS NOT NULL)
         SQL
       end
- 
-       execute <<-SQL
-       CREATE INDEX #{table}_account_kind_idx 
+
+      execute <<-SQL
+       CREATE INDEX #{table}_account_kind_idx
        ON #{table}(account(#{primary_key}), kind(#{primary_key}))
-       SQL
+      SQL
     end
 
     execute <<-SQL
@@ -72,11 +72,11 @@ Sequel.migration do
   end
 
   down do
-    execute "DROP INDEX IF EXISTS secrets_account_kind_identifier_idx"
+    execute 'DROP INDEX IF EXISTS secrets_account_kind_identifier_idx'
 
-    %w(roles resources).each do |t|
+    %w[roles resources].each do |t|
       execute "DROP FUNCTION IF EXISTS identifier(#{t})"
-      %w(account kind).each do |f|
+      %w[account kind].each do |f|
         execute "DROP FUNCTION IF EXISTS #{f}(#{t})"
         execute "DROP INDEX #{t}_#{f}_idx"
         execute "ALTER TABLE #{t} DROP CONSTRAINT has_#{f}"

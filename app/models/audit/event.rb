@@ -9,7 +9,7 @@ module Audit
 
     progname 'conjur'
 
-    def log_to logger
+    def log_to(logger)
       logger.log logger_severity, self, progname
     end
 
@@ -21,12 +21,12 @@ module Audit
     # like this and uses #inspect to print the message otherwise.
     #
     # I suppose it does :reek:ControlParameter, but there isn't much that can be done about it.
-    def === other
+    def ===(other)
       (other == String) || super
     end
 
     structured_data({}) # provide a base for subclasses to merge from
-    
+
     def self.can_fail
       include CanFail
     end

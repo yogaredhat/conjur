@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_dependency "conjur_audit/application_controller"
+require_dependency 'conjur_audit/application_controller'
 
 module ConjurAudit
   class MessagesController < ApplicationController
@@ -10,10 +10,10 @@ module ConjurAudit
 
     private
 
-    DIRECT_FIELDS = %i(facility severity hostname appname procid msgid).freeze
+    DIRECT_FIELDS = %i[facility severity hostname appname procid msgid].freeze
 
-    PAGING_FIELDS = %i(limit offset).freeze
-    
+    PAGING_FIELDS = %i[limit offset].freeze
+
     def query
       @query ||= request.query_parameters
     end
@@ -21,7 +21,7 @@ module ConjurAudit
     def direct_filter
       query.slice(*DIRECT_FIELDS)
     end
-    
+
     def sdata_query
       query.except(*DIRECT_FIELDS, *PAGING_FIELDS, :resource, :role, :entity)
     end
@@ -35,7 +35,7 @@ module ConjurAudit
         (filter[id] ||= {})[param] = value
       end
     end
-    
+
     def messages_with_entity_filter
       msgs = Message
       if (id = params[:entity])
@@ -55,7 +55,7 @@ module ConjurAudit
       msgs = messages_with_entity_filter
       filter.empty? ? msgs : msgs.matching_sdata(filter)
     end
-    
+
     def messages
       dataset = messages_with_data_filter.where(direct_filter).order(Sequel.desc(:timestamp))
 

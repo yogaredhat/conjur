@@ -4,9 +4,7 @@
 # K8s tests.  We don't fully understand what causes the bug but this is the
 # hack we settled on to fix it.
 #
-if defined? Authentication::Webservices
-  return
-end
+return if defined? Authentication::Webservices
 
 require 'forwardable'
 
@@ -25,7 +23,7 @@ module Authentication
     def self.from_string(account, csv_string)
       ::Types::NonEmptyString[csv_string] # validate non-empty
 
-      self.new(
+      new(
         csv_string
           .split(',')
           .map(&:strip)

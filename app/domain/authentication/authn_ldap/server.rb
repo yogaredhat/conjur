@@ -6,9 +6,7 @@ require 'net/ldap'
 
 module Authentication
   module AuthnLdap
-
     class Server
-
       def self.new(uri:, base:, bind_dn:, bind_pw:, log: nil)
         Net::LDAP.new(options(log)).tap do |ldap|
           if uri
@@ -26,10 +24,8 @@ module Authentication
       private
 
       def self.options(log)
-        log ? {instrumentation_service: log} : {}
+        log ? { instrumentation_service: log } : {}
       end
-
     end
-
   end
 end

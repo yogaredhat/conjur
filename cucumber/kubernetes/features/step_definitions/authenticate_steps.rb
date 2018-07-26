@@ -17,9 +17,9 @@ Then(/^I( can)? authenticate with authn-k8s as "([^"]*)"( without cert and key)?
       ssl_client_key: key,
       verify_ssl: OpenSSL::SSL::VERIFY_PEER
     )["#{ENV['CONJUR_ACCOUNT']}/#{CGI.escape username}/authenticate?request_ip=#{@request_ip}"].post(cert.to_s)
-  rescue
+  rescue StandardError
     raise if success
-    @error = $!
+    @error = $ERROR_INFO
   end
 
   unless response.nil?
@@ -43,9 +43,9 @@ Then(/^I( can)? authenticate pod matching "([^"]*)" with authn-k8s as "([^"]*)"(
       ssl_client_key: key,
       verify_ssl: OpenSSL::SSL::VERIFY_PEER
     )["#{ENV['CONJUR_ACCOUNT']}/#{CGI.escape username}/authenticate?request_ip=#{@request_ip}"].post(cert.to_s)
-  rescue
+  rescue StandardError
     raise if success
-    @error = $!
+    @error = $ERROR_INFO
   end
 
   unless response.nil?

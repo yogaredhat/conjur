@@ -1,18 +1,17 @@
 # frozen_string_literal: true
 
 module Authentication
-
   # - Runs security checks
   # - Finds the appropriate authenticator
   # - Validates credentials against
   # - Returns a new token
   class Strategy < ::Dry::Struct
-
     AuthenticatorNotFound = ::Util::ErrorClass.new(
-      "'{0}' wasn't in the available authenticators")
+      "'{0}' wasn't in the available authenticators"
+    )
     InvalidCredentials = ::Util::ErrorClass.new(
-      "Invalid credentials")
-
+      'Invalid credentials'
+    )
 
     class Input < ::Dry::Struct
       attribute :authenticator_name, ::Types::NonEmptyString
@@ -54,11 +53,11 @@ module Authentication
 
     # optional constructor parameters
     #
-    attribute :security, ::Types::Any.default{ ::Authentication::Security.new }
+    attribute :security, ::Types::Any.default { ::Authentication::Security.new }
     attribute :env, ::Types::Any.default(ENV)
-    attribute :token_factory, ::Types::Any.default{ TokenFactory.new }
-    attribute :role_cls, ::Types::Any.default{ ::Role }
-    attribute :audit_log, ::Types::Any.default{ AuditLog }
+    attribute :token_factory, ::Types::Any.default { TokenFactory.new }
+    attribute :role_cls, ::Types::Any.default { ::Role }
+    attribute :audit_log, ::Types::Any.default { AuditLog }
 
     def conjur_token(input)
       authenticator = authenticators[input.authenticator_name]
@@ -70,8 +69,7 @@ module Authentication
 
       audit_success(input)
       new_token(input)
-
-    rescue => e
+    rescue StandardError => e
       audit_failure(input, e)
       raise e
     end
@@ -115,7 +113,7 @@ module Authentication
 
     def validate_origin(input)
       authn_role = role(input.username, input.account)
-      raise Unauthorized, "Invalid origin" unless authn_role.valid_origin?(input.origin)
+      raise Unauthorized, 'Invalid origin' unless authn_role.valid_origin?(input.origin)
     end
 
     def new_token(input)
@@ -125,5 +123,4 @@ module Authentication
       )
     end
   end
-
 end

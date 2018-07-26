@@ -10,7 +10,7 @@ Sequel.migration do
       String :policy_text, null: false
       String :policy_sha256, null: false
 
-      primary_key [:resource_id, :version]
+      primary_key %i[resource_id version]
     end
 
     execute Functions.create_version_trigger_sql(:policy_versions)
@@ -18,7 +18,7 @@ Sequel.migration do
 
   down do
     execute Functions.drop_version_trigger_sql(:policy_versions)
-    
+
     drop_table :policy_versions
   end
 end

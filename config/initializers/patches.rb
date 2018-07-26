@@ -16,7 +16,7 @@ end
 
 class String
   def to_bool
-    case self.downcase
+    case downcase
     when 'n', 'no', 'f', 'false', 'nay', '', 'off', '0'
       false
     else true

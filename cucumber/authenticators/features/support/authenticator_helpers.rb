@@ -3,7 +3,6 @@
 # Utility methods for authenticators
 #
 module AuthenticatorHelpers
-
   # Mostly to document the mutable variables that are in play.
   # To at least mitigate the poor design encouraged by the way cucumber
   # shares state
@@ -11,7 +10,7 @@ module AuthenticatorHelpers
   attr_reader :response_body, :http_status, :rest_client_error
 
   def authenticate_with_ldap(service_id:, account:, username:, password:)
-    # TODO fix this the right way
+    # TODO: fix this the right way
     path = "#{conjur_hostname}/authn-ldap/#{service_id}/#{account}/#{username}/authenticate"
     post(path, password)
   end
@@ -19,7 +18,7 @@ module AuthenticatorHelpers
   def token_for(username, token_string)
     return nil unless http_status == 200
     ConjurToken.new(token_string).username == username
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -63,14 +62,14 @@ module AuthenticatorHelpers
   def api_for(username, api_key = nil)
     api_key = admin_api_key if username == 'admin'
     api_key ||= Conjur::API.new_from_key('admin', admin_api_key).role(
-                  full_username(username)).rotate_api_key
+      full_username(username)
+    ).rotate_api_key
     Conjur::API.new_from_key(username, api_key)
   end
 
   def full_username(username, account: Conjur.configuration.account)
     "#{account}:user:#{username}"
   end
-
 end
 
 World(AuthenticatorHelpers)

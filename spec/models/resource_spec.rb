@@ -2,18 +2,18 @@
 
 require 'spec_helper'
 
-describe Resource, :type => :model do
-  include_context "create user"
-  
+describe Resource, type: :model do
+  include_context 'create user'
+
   let(:login) { "u-#{random_hex}" }
-  let(:kind) { "the-kind" }
+  let(:kind) { 'the-kind' }
   let(:resource_id_id) { "r-#{random_hex}" }
-  let(:resource_id) { "rspec:#{kind}:#{resource_id_id}"}
+  let(:resource_id) { "rspec:#{kind}:#{resource_id_id}" }
   let(:the_resource) { Resource.create(resource_id: resource_id, owner: the_user) }
 
   describe '.[]' do
-    it "allows looking up by composite ids" do
-      the_resource or raise # vivify
+    it 'allows looking up by composite ids' do
+      the_resource || raise # vivify
       expect(Resource['rspec', kind, resource_id_id]).to eq the_resource
     end
   end
@@ -21,108 +21,106 @@ describe Resource, :type => :model do
   # Hideous hack to make tests pass temporarily with rotator change
   #
   #
-  remove_expires_at = ->(x) do
+  remove_expires_at = lambda do |x|
     if x.is_a?(Hash)
-      x.delete("expires_at")
-      if x.key?("secrets")
-        x["secrets"].map! {|y| y.delete("expires_at"); y }
-      end
+      x.delete('expires_at')
+      x['secrets'].map! { |y| y.delete('expires_at'); y } if x.key?('secrets')
     elsif x.is_a?(Array)
-      x.map! {|y| y.delete("expires_at"); y }
+      x.map! { |y| y.delete('expires_at'); y }
     end
     x
   end
 
-  shared_examples_for "provides expected JSON" do
-    specify {
+  shared_examples_for 'provides expected JSON' do
+    specify do
       the_resource.reload
       hash = JSON.parse(the_resource.to_json)
-      expect(hash.delete("created_at")).to be
-      remove_expires_at.(hash)
+      expect(hash.delete('created_at')).to be
+      remove_expires_at.call(hash)
       expect(hash).to eq(as_json.stringify_keys)
-    }
+    end
   end
-  
-  let(:base_hash) {
+
+  let(:base_hash) do
     {
       id: the_resource.resource_id,
       owner: the_user.role_id,
       permissions: [],
       annotations: []
     }
-  }
-  
-  it "account is required" do
-    expect{ Resource.create(resource_id: "", owner: the_user) }.to raise_error(Sequel::CheckConstraintViolation, /(has_kind|has_account)/)
   end
-  it "kind is required" do
-    expect{ Resource.create(resource_id: "the-account", owner: the_user) }.to raise_error(Sequel::CheckConstraintViolation, /has_kind/)
+
+  it 'account is required' do
+    expect { Resource.create(resource_id: '', owner: the_user) }.to raise_error(Sequel::CheckConstraintViolation, /(has_kind|has_account)/)
   end
-    
-  context "basic object" do
+  it 'kind is required' do
+    expect { Resource.create(resource_id: 'the-account', owner: the_user) }.to raise_error(Sequel::CheckConstraintViolation, /has_kind/)
+  end
+
+  context 'basic object' do
     let(:as_json) { base_hash }
-    it_should_behave_like "provides expected JSON"
+    it_should_behave_like 'provides expected JSON'
   end
-  
-  context "with annotation" do
-    before {
-      Annotation.create resource: the_resource, name: "name", value: "Kevin"
-    }
-    let(:as_json) { 
-      base_hash.merge annotations: [ { "name" => "name", "value" => "Kevin" } ]
-    }
-    it_should_behave_like "provides expected JSON"
+
+  context 'with annotation' do
+    before do
+      Annotation.create resource: the_resource, name: 'name', value: 'Kevin'
+    end
+    let(:as_json) do
+      base_hash.merge annotations: [{ 'name' => 'name', 'value' => 'Kevin' }]
+    end
+    it_should_behave_like 'provides expected JSON'
   end
-  context "with permission" do
-    before {
-      the_resource.permit "fry", the_user
-    }
-    let(:as_json) { 
-      base_hash.merge permissions: [ {"privilege"=>"fry", "role"=>the_user.id} ]
-    }
-    it_should_behave_like "provides expected JSON"
+  context 'with permission' do
+    before do
+      the_resource.permit 'fry', the_user
+    end
+    let(:as_json) do
+      base_hash.merge permissions: [{ 'privilege' => 'fry', 'role' => the_user.id }]
+    end
+    it_should_behave_like 'provides expected JSON'
   end
-  context "with secret" do
-    let(:kind) { "variable" }
-    before {
-      the_resource.add_secret value: "the-value"
-    }
-    let(:as_json) { 
-      base_hash.merge secrets: [ {"version" => 1} ]
-    }
-    it_should_behave_like "provides expected JSON"
+  context 'with secret' do
+    let(:kind) { 'variable' }
+    before do
+      the_resource.add_secret value: 'the-value'
+    end
+    let(:as_json) do
+      base_hash.merge secrets: [{ 'version' => 1 }]
+    end
+    it_should_behave_like 'provides expected JSON'
   end
-  context "with corresponding role" do
+  context 'with corresponding role' do
     let(:the_role) { Role.create(role_id: resource_id) }
     let(:the_membership) { RoleMembership[role: the_role, member: the_user, admin_option: true, ownership: true] }
-    before {
+    before do
       the_role
       the_resource
-    }
-    it "the rolsource is granted to the owner with admin option" do
+    end
+    it 'the rolsource is granted to the owner with admin option' do
       expect(the_membership).to be
     end
-    it "the role cannot be explicitly granted with the ownership flag" do
+    it 'the role cannot be explicitly granted with the ownership flag' do
       expect { RoleMembership.create(role: the_role, member: the_user, admin_option: true, ownership: true) }.to raise_error(Sequel::UniqueConstraintViolation)
     end
-    context "when the user is also explicitly granted the role" do
+    context 'when the user is also explicitly granted the role' do
       let(:the_membership_again) { RoleMembership.create(role: the_role, member: the_user, admin_option: false) }
-      it "the role can still be explicitly granted" do
+      it 'the role can still be explicitly granted' do
         the_membership_again
       end
       it "the corresponding role is listed exactly once in the owner's list of roles" do
         the_membership_again
-        expect(the_user.all_roles.reverse_order(:role_id).all.map(&:role_id)).to eq([ the_user, the_role ].map(&:role_id))
+        expect(the_user.all_roles.reverse_order(:role_id).all.map(&:role_id)).to eq([the_user, the_role].map(&:role_id))
       end
     end
-    it "the role can still be explicitly granted" do
+    it 'the role can still be explicitly granted' do
       RoleMembership.create(role: the_role, member: the_user, admin_option: true)
     end
     it "the corresponding role is in the owner's list of roles" do
       expect(the_user.all_roles.all).to include(the_role)
     end
-    context "changing the owner" do
-      it "updates the role grants" do
+    context 'changing the owner' do
+      it 'updates the role grants' do
         the_new_role = Role.create(role_id: "rspec:the-role:#{random_hex}")
         the_resource.owner = the_new_role
         the_resource.save
@@ -130,31 +128,31 @@ describe Resource, :type => :model do
         expect(RoleMembership[role: the_role, member: the_new_role, admin_option: true, ownership: true]).to be
       end
     end
-    context "deleting the resource" do
-      it "revokes the role grant" do
+    context 'deleting the resource' do
+      it 'revokes the role grant' do
         the_resource.delete
         expect(the_membership).to_not be
       end
     end
   end
 
-  describe "#enforce_secrets_version_limit" do
-    let(:kind) { "variable" }
-    it "deletes extra secrets" do
-      the_resource.add_secret value: "v-1"
-      the_resource.add_secret value: "v-2"
-      the_resource.add_secret value: "v-3"
-      expect(remove_expires_at.(the_resource.as_json['secrets'])).to eq([ 1, 2, 3 ].map{|i| { "version" => i }})
+  describe '#enforce_secrets_version_limit' do
+    let(:kind) { 'variable' }
+    it 'deletes extra secrets' do
+      the_resource.add_secret value: 'v-1'
+      the_resource.add_secret value: 'v-2'
+      the_resource.add_secret value: 'v-3'
+      expect(remove_expires_at.call(the_resource.as_json['secrets'])).to eq([1, 2, 3].map { |i| { 'version' => i } })
 
       the_resource.enforce_secrets_version_limit 2
       the_resource.reload
 
-      expect(remove_expires_at.(the_resource.as_json['secrets'])).to eq([ 2, 3 ].map{|i| { "version" => i }})
+      expect(remove_expires_at.call(the_resource.as_json['secrets'])).to eq([2, 3].map { |i| { 'version' => i } })
 
       the_resource.enforce_secrets_version_limit 1
       the_resource.reload
 
-      expect(remove_expires_at.(the_resource.as_json['secrets'])).to eq([ 3 ].map{|i| { "version" => i }})
+      expect(remove_expires_at.call(the_resource.as_json['secrets'])).to eq([3].map { |i| { 'version' => i } })
     end
   end
 end
