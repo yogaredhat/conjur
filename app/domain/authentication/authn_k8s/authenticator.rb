@@ -1,36 +1,24 @@
 require 'cgi'
 require 'forwardable'
+require 'command_class'
 require_relative 'errors'
 
 module Authentication
   module AuthnK8s
 
-    class Authenticator
-      extend ::Util::CommandObject
+    Authenticator = CommandClass.new(
+      dependencies: {env: ENV, validate_pod_request: ValidatePodRequest.new},
+      input: [:authenticator_input]
+    ) do
       extend Forwardable
 
-      dependencies env: ENV, validate_pod_request: ValidatePodRequest.new
-      input :authenticator_input
-      steps :validate_cert_exists, :validate_the_request, :validate_header_cert
+      def_delegators @authenticator_input, :service_id, :authenticator_name,
+        :account, :username, :request
 
-      # TODO:
-      # def_delegators @authenticator_input, :service_id, :authenticator_name,
-      #                :account, :username, :request
-      #
-      def service_id
-        authenticator_input.service_id
-      end
-      def authenticator_name
-        authenticator_input.authenticator_name
-      end
-      def account
-        authenticator_input.account
-      end
-      def username
-        authenticator_input.username
-      end
-      def request
-        authenticator_input.request
+      def call
+        validate_cert_exists
+        validate_the_request
+        validate_header_cert
       end
 
       # This delegates to all the work to the call method created automatically
