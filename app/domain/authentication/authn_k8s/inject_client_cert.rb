@@ -1,3 +1,5 @@
+require 'command_class'
+
 module Authentication
   module AuthnK8s
 
