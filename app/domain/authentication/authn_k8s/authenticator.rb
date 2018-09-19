@@ -7,7 +7,7 @@ module Authentication
   module AuthnK8s
 
     Authenticator = CommandClass.new(
-      dependencies: {env: ENV, validate_pod_request: ValidatePodRequest.new},
+      dependencies: {validate_pod_request: ValidatePodRequest.new},
       inputs: [:authenticator_input]
     ) do
       extend Forwardable
@@ -24,7 +24,7 @@ module Authentication
       private
 
       def validate_the_request
-        validate_pod_request.(pod_request)
+        @validate_pod_request.(pod_request)
       end
 
       def validate_header_cert
