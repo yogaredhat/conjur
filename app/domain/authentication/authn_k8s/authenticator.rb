@@ -8,7 +8,7 @@ module Authentication
 
     Authenticator = CommandClass.new(
       dependencies: {env: ENV, validate_pod_request: ValidatePodRequest.new},
-      input: [:authenticator_input]
+      inputs: [:authenticator_input]
     ) do
       extend Forwardable
 
