@@ -22,7 +22,7 @@ module Authentication
       private
 
       def validate
-        @validate_pod_request.(pod_request)
+        @validate_pod_request.(pod_request: pod_request)
         validate_csr
       end
 

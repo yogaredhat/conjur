@@ -24,7 +24,7 @@ module Authentication
       private
 
       def validate_the_request
-        @validate_pod_request.(pod_request)
+        @validate_pod_request.(pod_request: pod_request)
       end
 
       def validate_header_cert
