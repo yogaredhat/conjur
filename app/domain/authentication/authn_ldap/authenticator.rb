@@ -54,15 +54,15 @@ module Authentication
 
       def filter_template
         @filter_template ||= 
-          env['LDAP_FILTER'] || '(&(objectClass=posixAccount)(uid=%s))'
+          @env['LDAP_FILTER'] || '(&(objectClass=posixAccount)(uid=%s))'
       end
 
       def ldap_server
         @ldap_server ||= @ldap_server_factory.new(
-          uri:     env['LDAP_URI'],
-          base:    env['LDAP_BASE'],
-          bind_dn: env['LDAP_BINDDN'],
-          bind_pw: env['LDAP_BINDPW']
+          uri:     @env['LDAP_URI'],
+          base:    @env['LDAP_BASE'],
+          bind_dn: @env['LDAP_BINDDN'],
+          bind_pw: @env['LDAP_BINDPW']
         )
       end
 
