@@ -81,7 +81,7 @@ module Rotation
       end
 
       def log_error(e)
-        # TODO: add to audit log (separate story)
+        $stderr.puts e
       end
 
       def resource_id
