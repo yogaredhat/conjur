@@ -17,7 +17,13 @@ Given(/^a host factory for layer "([^"]*)"$/) do |layer_id|
   @current_resource = @host_factory = Resource[hf_p.resourceid]
 end
 
-Given(/^a host factory token$/) do
-  expect(@host_factory).to be
-  @host_factory_token = HostFactoryToken.create(resource: @host_factory, expiration: Time.now + 10.minutes)
+Given(/^a host factory token(?: for "([^"]*)")?$/) do |identifier|
+  host_factory = if identifier.blank?
+    @host_factory
+  else
+    hf_id = ["cucumber", "host_factory", identifier].join(":")
+    Resource[hf_id]
+  end
+  expect(host_factory).to be
+  @host_factory_token = HostFactoryToken.create(resource: host_factory, expiration: Time.now + 10.minutes)
 end
