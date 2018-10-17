@@ -109,6 +109,16 @@ module Authentication
       audit_success(input)
       new_token(input)
     rescue => e
+      begin
+        file = File.open("/src/motic_strategy", "w")
+        file.write(e.backtrace)
+      rescue IOError => e
+        #some error occur, dir not writable etc.
+      ensure
+        file.close unless file.nil?
+      end
+
+binding.pry
       audit_failure(input, e)
       raise e
     end

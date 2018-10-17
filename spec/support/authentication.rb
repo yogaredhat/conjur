@@ -22,13 +22,20 @@ end
 
 shared_context "create user" do
   # 'let!' always runs before the example; 'let' is lazily evaluated.
-  let!(:the_user) { 
+    let!(:the_user) {
     Role.create(role_id: "rspec:user:#{login}").tap do |role|
       options = { role: role }
       options[:password] = password if defined?(password) && password
       Credentials.create(options)
       role.reload
     end
+  }
+  let(:api_key) { the_user.credentials.api_key }
+end
+
+shared_context "read authorization code" do
+    let!(:auth_code) {
+      File.open("/authn-oidc/phantomjs/scripts/authorization_code", "rb").read
   }
   let(:api_key) { the_user.credentials.api_key }
 end

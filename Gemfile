@@ -93,6 +93,8 @@ group :development, :test do
   gem 'spring-commands-cucumber'
   gem 'spring-commands-rspec'
   gem 'table_print'
+  gem 'vcr'
+  gem 'webmock'
 end
 
 group :development do

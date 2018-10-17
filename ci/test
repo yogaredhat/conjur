@@ -32,7 +32,8 @@ exit
 
 # Cleanup started containers, ok they're already gone.
 function finish {
-  docker-compose down --rmi 'local' --volumes || true
+#  docker-compose down --rmi 'local' --volumes || true
+  echo "done"
 }
 trap finish EXIT
 
@@ -59,9 +60,16 @@ function run_cucumber_tests() {
 
   # Run the tests
   docker-compose run --no-deps -T --rm $cucumber_env_args -e CONJUR_AUTHN_API_KEY=$api_key cucumber -c \
-     "bundle exec cucumber -p $profile --format junit --out cucumber/$profile/features/reports"
+     "bundle exec cucumber -p $profile --format junit --out cucumber/$profile/features/reports
+     cat /authn-oidc/phantomjs/scripts/authorization_code
+     bundle exec env CI_REPORTS=$REPORT_ROOT/spec/reports  rspec $REPORT_ROOT/spec/controllers/authenticate_controller_spec.rb --format progress --require ci/reporter/rspec --format CI::Reporter::RSpecFormatter
+"
+
 
   cucumber_env_args=""
+}
+
+function stop_cucumber_containers() {
   docker-compose down --rmi 'local' --volumes
 }
 
@@ -94,7 +102,7 @@ function prepare_env_auth_oidc() {
 function keycloak_isready?() {
   for i in {1..5}
   do
-   sleep=4
+   sleep=6
    output=$(docker-compose logs oidc-keycloak | grep "started" | wc -l)
    if [ $output -ne 0 ]; then
         echo "Keycloak server is up and ready"
@@ -143,30 +151,70 @@ cd ci
 if [[ $RUN_ROTATORS = true || $RUN_ALL = true ]]; then
   services="$services testdb"
   run_cucumber_tests 'rotators'
+  stop_cucumber_containers
 fi
 
 if [[ $RUN_AUTHENTICATORS = true || $RUN_ALL = true ]]; then
   services="$services oidc-keycloak ldap-server"
   prepare_env_auth_oidc
   run_cucumber_tests 'authenticators'
+  stop_cucumber_containers
 fi
 
 if [[ $RUN_API = true || $RUN_ALL = true ]]; then
   run_cucumber_tests 'api'
+  stop_cucumber_containers
 fi
 
 if [[ $RUN_POLICY = true || $RUN_ALL = true ]]; then
   run_cucumber_tests 'policy'
+  stop_cucumber_containers
 fi
 
 if [[ $RUN_RSPEC = true || $RUN_ALL = true ]]; then
+
+  vcrFile=$REPORT_ROOT/spec/vcr/recorded_flow.yml
+  if [[ ! -e "${vcrFile}" ]]; then
+        echo File $vcrFile not exist. Generate the file.
+        services="$services oidc-keycloak ldap-server"
+        prepare_env_auth_oidc
+        run_cucumber_tests 'authenticators'
+#        stop_cucumber_containers
+
+
+  #       services="$services oidc-keycloak ldap-server client"
+  # ##      duplicate code from func prepare_env_auth_oidc
+  #
+  #        docker-compose up --no-deps -d oidc-keycloak
+  # ##      services="$services client"
+  # ##      echo xxxxxxxxxxxx $services
+  #       docker-compose up --no-deps -d client
+  #
+  #       KEYCLOAK_CLIENT_ID=$(docker-compose exec -T oidc-keycloak printenv CLIENT_ID | tr -d '\r')
+  #       REDIRECT_URI=$(docker-compose exec -T oidc-keycloak printenv REDIRECT_URI | tr -d '\r')
+  #       KEYCLOAK_CLIENT_SECRET=$(docker-compose exec -T oidc-keycloak printenv CLIENT_SECRET | tr -d '\r')
+  #
+  #       echo KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID
+  #       echo REDIRECT_URI=$REDIRECT_URI
+  #       echo KEYCLOAK_CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET
+  #
+  #       # add variables' values for keycloak
+  #       docker-compose exec client conjur variable values add conjur/authn-oidc/keycloak/client-id $KEYCLOAK_CLIENT_ID
+  #       docker-compose exec client conjur variable values add conjur/authn-oidc/keycloak/client-secret $KEYCLOAK_CLIENT_SECRET
+  #       docker-compose exec client conjur variable values add conjur/authn-oidc/keycloak/provider-uri $REDIRECT_URI
+  #       #"https://keycloak:8443/auth/realms/master"
+  else
+        echo File $vcrFile already exist. Do not generate the file.
+  fi
+
   docker-compose up --no-deps -d pg
 
   until docker-compose run -T --rm pg psql -U postgres -h pg -c "select 1" -d postgres; do sleep 1; done
 
-  docker-compose run -T --rm --no-deps cucumber -c "
-    bundle exec rake db:migrate
-    rm -rf $REPORT_ROOT/spec/reports
-    bundle exec env CI_REPORTS=$REPORT_ROOT/spec/reports rspec --format progress --require ci/reporter/rspec --format CI::Reporter::RSpecFormatter
-  "
-fi
+  # docker-compose run -T  --no-deps cucumber -c "
+  #    bundle exec rake db:migrate
+  #    rm -rf $REPORT_ROOT/spec/reports
+  #    bundle exec env CI_REPORTS=$REPORT_ROOT/spec/reports  rspec $REPORT_ROOT/spec/controllers/authenticate_controller_spec.rb --format progress --require ci/reporter/rspec --format CI::Reporter::RSpecFormatter
+  #    bundle exec env CI_REPORTS=$REPORT_ROOT/spec/reports  rspec --format progress --require ci/reporter/rspec --format CI::Reporter::RSpecFormatter
+  #  "
+ fi

@@ -125,6 +125,8 @@ GEM
     conjur-rack-heartbeat (2.0.0)
       rack
     contracts (0.16.0)
+    crack (0.4.3)
+      safe_yaml (~> 1.0.0)
     crass (1.0.3)
     csr (0.1.0)
     cucumber (2.4.0)
@@ -187,6 +189,7 @@ GEM
     globalid (0.4.0)
       activesupport (>= 4.2.0)
     haikunator (1.1.0)
+    hashdiff (0.3.7)
     highline (1.7.10)
     http (2.2.2)
       addressable (~> 2.3)
@@ -421,6 +424,7 @@ GEM
     validate_url (1.0.2)
       activemodel (>= 3.0.0)
       addressable
+    vcr (4.0.0)
     virtus (1.0.5)
       axiom-types (~> 0.1)
       coercible (~> 1.0)
@@ -429,6 +433,10 @@ GEM
     webfinger (1.1.0)
       activesupport
       httpclient (>= 2.4)
+    webmock (3.4.2)
+      addressable (>= 2.3.6)
+      crack (>= 0.3.2)
+      hashdiff
     websocket (1.2.8)
     websocket-client-simple (0.3.0)
       event_emitter
@@ -502,6 +510,8 @@ DEPENDENCIES
   table_print
   therubyracer
   uglifier
+  vcr
+  webmock
   websocket-client-simple
 
 BUNDLED WITH

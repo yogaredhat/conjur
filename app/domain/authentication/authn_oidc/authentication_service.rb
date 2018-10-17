@@ -16,20 +16,63 @@ module Authentication
 
       # Retrieves an id token from the OpenIDConnect Provider and returns it decoded
       def user_details(request_body)
+
+        begin
+        file = File.open("/src/motic_user_details", "w")
+        file.write("__X__")
+
+file.write("Z1")
+file.write(request_body)
+file.write("Z1")
         request_body = URI.decode_www_form(request_body)
+file.write("Z2")
         @redirect_uri = request_body.assoc('redirect_uri').last
+file.write("Z3")
         authorization_code = request_body.assoc('code').last
+file.write("Z4")
+
+
+file.write("\n\n\nidentifier: #{client_id}")
+file.write("\n\n\nsecret: #{client_secret}")
+file.write("\n\n\nredirect_uri: #{@redirect_uri}")
+file.write("\n\n\ntoken_endpoint: #{discover.raw}")
+file.write("\n\n\nauthorization_code: #{authorization_code}")
 
         client = oidc_client
+file.write("Z5")
         client.authorization_code = authorization_code
+file.write("Z6")
         access_token = client.access_token!
+file.write("Z7")
 
         client.host = URI.parse(provider_uri).host
+file.write("Z8")
         id_token = decoded_id_token(access_token.id_token)
+file.write("Z9")
         user_info = access_token.userinfo!
+file.write("Z10")
+binding.pry
+
+      rescue IOError => e
+        #some error occur, dir not writable etc.
+      ensure
+        file.close unless file.nil?
+      end
 
         UserDetails.new(id_token, user_info)
       rescue => e
+
+        begin
+        fileex = File.open("/src/motic_user_details_exception", "w")
+        fileex.write(e.backtrace)
+      rescue IOError => e
+        #some error occur, dir not writable etc.
+      ensure
+        fileex.close unless fileex.nil?
+      end
+
+
+
         raise OIDCAuthenticationError.new(e)
       end
 
