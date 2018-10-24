@@ -4,16 +4,16 @@ module Authentication
   module AuthnOidc
     class OidcClient
 
-      def initialize(identifier:, client_secret:, redirect_uri:, provider_uri:)
-        @identifier = identifier
+      def initialize(client_id:, client_secret:, redirect_uri:, provider_uri:)
+        @client_id = client_id
         @client_secret = client_secret
         @redirect_uri = redirect_uri
         @provider_uri = provider_uri
       end
 
       def oidc_client
-        @oidc_client ||=  OpenIDConnect::Client.new(
-          identifier: @identifier,
+        @oidc_client ||= OpenIDConnect::Client.new(
+          identifier: @client_id,
           secret: @client_secret,
           redirect_uri: @redirect_uri,
           token_endpoint: discovered_resource.token_endpoint,
@@ -41,7 +41,7 @@ module Authentication
       def issuer
         discovered_resource.issuer
       end
-      
+
       private
 
       def access_token
