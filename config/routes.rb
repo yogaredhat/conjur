@@ -44,6 +44,10 @@ Rails.application.routes.draw do
       delete  "/roles/:account/:kind/*identifier" => "roles#delete_member", :constraints => QueryParameterActionRecognizer.new("members")
       get     "/roles/:account/:kind/*identifier" => "roles#show"
 
+      get "/resources/:account/:kind/*identifier" => 'authorization#show',
+          constraints: { format: 'application/x-pem-file' }
+      post "/resources/:account/:kind/*identifier" => 'authorization#sign',
+          constraints: { format: 'application/x-pem-file' }
 
       get     "/resources/:account/:kind/*identifier" => 'resources#check_permission', :constraints => QueryParameterActionRecognizer.new("check")
       get     "/resources/:account/:kind/*identifier" => 'resources#permitted_roles', :constraints => QueryParameterActionRecognizer.new("permitted_roles")

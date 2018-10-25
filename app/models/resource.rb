@@ -178,4 +178,8 @@ class Resource < Sequel::Model
   def annotation name
     annotations_dataset.where(name: name).select(:value).single_value
   end
+
+  def authorization_certificate privilege
+    AuthorizationCertificate.find_or_create resource_id: id, privilege: privilege
+  end
 end
