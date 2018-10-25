@@ -69,6 +69,7 @@ module Authentication
     attribute :token_factory, ::Types::Any.default{ TokenFactory.new }
     attribute :role_cls, ::Types::Any.default{ ::Role }
     attribute :audit_log, ::Types::Any.default{ AuditLog }
+    attribute :oidc_client_class, ::Types::Any.default{ AuthnOidc::OidcClient }
 
     def login(input)
       authenticator = authenticators[input.authenticator_name]
@@ -110,7 +111,18 @@ module Authentication
     # Or take a different approach that accomplishes the same goals
     #
     def conjur_token_oidc(input)
-      user_details = oidc_user_details(input)
+      # we decode the request body here as we can read it once
+      decoded_request_body = decoded_body(input.request.body.read)
+      redirect_uri = decoded_request_body.assoc('redirect_uri').last
+      authorization_code = decoded_request_body.assoc('code').last
+
+      oidc_client = oidc_client(
+        redirect_uri: redirect_uri,
+        service_id: input.service_id,
+        conjur_account: input.account
+      )
+
+      user_details = oidc_client.user_details!(authorization_code)
       oidc_validate_credentials(input, user_details)
 
       username = user_details.user_info.preferred_username
@@ -128,20 +140,18 @@ module Authentication
 
     private
 
-    # NOTE: These two methods are "special" (outside the framework) by design.
-    # We already know that the OIDC authenticator doesn't fit within this
-    # framework design, and will be pulling it out into multiple routes and its
-    # own objects on the next iteration.
-    #
-    # Thus these two methods actually represent the first step in that
-    # direction.  They also more honestly portray the situation.
-    #
-    def oidc_user_details(input)
-      AuthnOidc::GetUserDetails.new.(
-        request_body: input.request.body.read,
-        service_id: input.service_id,
-        conjur_account: input.account
+    def oidc_client(redirect_uri:, service_id:, conjur_account:)
+      oidc_client_configuration = AuthnOidc::GetOidcClientConfiguration.new.(
+        redirect_uri: redirect_uri,
+        service_id: service_id,
+        conjur_account: conjur_account
       )
+
+      oidc_client_class.new(oidc_client_configuration)
+    end
+
+    def decoded_body(request_body)
+      URI.decode_www_form(request_body)
     end
 
     # NOTE: We can revisit this decision, but for now there is absolutely no
